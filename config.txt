@@ -1,0 +1,19 @@
+ const firebaseConfig = {
+            apiKey: "AIzaSyCiF_rlhJO8TO3RJ2G4OaG9SOZoGgPpvhk",
+            authDomain: "dignex-88f5b.firebaseapp.com",
+            projectId: "dignex-88f5b",
+            storageBucket: "dignex-88f5b.firebasestorage.app",
+            messagingSenderId: "1039498013474",
+            appId: "1:1039498013474:web:2299eefcfc750de54f537b"
+};
+
+
+
+
+dcyl66lfc
+
+
+lzxuzi3d
+
+
+BOEJshwyI0lNpsEspDyuVG7M95DmColVvtcZWCWX85wCfbUd6F30L7N39oyBXP0o_gq55R1Qen1JPcglhznq2lU

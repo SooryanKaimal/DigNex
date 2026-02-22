@@ -1,0 +1,17 @@
+{
+  "name": "DigNex Super App",
+  "short_name": "DigNex",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "description": "Connect, Chat, and Share on DigNex.",
+  "icons": [
+    {
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Black_check.svg/512px-Black_check.svg.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "gcm_sender_id": "103953800507"
+}
