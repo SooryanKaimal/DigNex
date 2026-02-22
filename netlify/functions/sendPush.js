@@ -4,23 +4,24 @@ exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
     try {
-        // Parse the secure Firebase Service Account key from Netlify
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-        // 🚀 THE FIX: Repair the broken newline characters caused by Netlify's UI
-        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        // 🚀 THE BULLETPROOF FIX: 
+        // Forcefully extract only the 3 pieces we need and strictly format the newlines
+        const formattedPrivateKey = serviceAccount.private_key.replace(/\\n/g, '\n');
 
-        // Initialize Firebase Admin (only once)
         if (!admin.apps.length) {
             admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount)
+                credential: admin.credential.cert({
+                    projectId: serviceAccount.project_id,
+                    clientEmail: serviceAccount.client_email,
+                    privateKey: formattedPrivateKey
+                })
             });
         }
 
-        // Get the token and message data sent from your index.html
         const { token, title, body } = JSON.parse(event.body);
 
-        // Fire the notification to the phone!
         const message = {
             notification: { title: title, body: body },
             token: token, 
