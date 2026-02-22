@@ -25,6 +25,10 @@ exports.handler = async (event) => {
         const message = {
             notification: { title: title, body: body },
             token: token, 
+            
+            // 🚀 THE SPEED FIX: Tell Android and Chrome to deliver this instantly
+            android: { priority: "high" },
+            webpush: { headers: { Urgency: "high" } }
         };
 
         await admin.messaging().send(message);
@@ -35,3 +39,4 @@ exports.handler = async (event) => {
         return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
     }
 };
+
