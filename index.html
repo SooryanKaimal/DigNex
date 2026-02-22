@@ -4,242 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: wss: data: blob: 'unsafe-inline' 'unsafe-eval';">
-    <title>DigNex Super App</title>
+    <title>DigNex</title>
     <style>
-        /* ==========================================
-           CSS VARIABLES (THEME ENGINE)
-           ========================================== */
-        :root {
-            --bg-body: #000000; /* PC Background */
-            --bg-app: #0f172a;  /* Main App Background */
-            --bg-header: #1e293b; /* Header/Nav Background */
-            --bg-input: #1e293b;
-            --text-main: #ffffff;
-            --text-sub: #94a3b8;
-            --border-color: #334155;
-            --msg-sent-bg: #3b82f6;
-            --msg-sent-text: #ffffff;
-            --msg-recv-bg: #334155;
-            --msg-recv-text: #ffffff;
-            --accent: #38bdf8;
-        }
-
-        .light-theme {
-            --bg-body: #e2e8f0;
-            --bg-app: #f8fafc;
-            --bg-header: #ffffff;
-            --bg-input: #f1f5f9;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --border-color: #cbd5e1;
-            --msg-sent-bg: #3b82f6;
-            --msg-sent-text: #ffffff;
-            --msg-recv-bg: #e2e8f0;
-            --msg-recv-text: #0f172a;
-            --accent: #0284c7;
-        }
-
-        /* ==========================================
-           GLOBAL & RESPONSIVE LAYOUT
-           ========================================== */
-        body { 
-            margin: 0; padding: 0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: var(--bg-body); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            transition: background-color 0.3s;
-        }
-
-        /* 📱 The "Mobile Shape" Container for PC */
-        .app-container {
-            width: 100%;
-            max-width: 480px; /* Forces phone shape on PC */
-            height: 100vh;
-            background-color: var(--bg-app);
-            color: var(--text-main);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
-            transition: all 0.3s;
-        }
-
-        /* ==========================================
-           UTILITIES & COMPONENTS
-           ========================================== */
+        body { margin: 0; padding: 0; font-family: sans-serif; background-color: #0b1120; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         .hidden { display: none !important; }
-        .flex-center { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        
-        .btn { padding: 12px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-blue { background-color: #3b82f6; color: white; }
+        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-blue { background-color: #38bdf8; color: #0b1120; }
         .btn-red { background-color: #ef4444; color: white; }
         .btn:active { transform: scale(0.95); }
-
-        /* Inputs */
-        input[type="text"], input[type="file"], textarea { 
-            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); 
-            outline: none; background-color: var(--bg-input); color: var(--text-main); box-sizing: border-box; 
-        }
-
-        /* Chat Bubbles */
-        .message { padding: 10px 14px; border-radius: 18px; margin-bottom: 10px; max-width: 75%; word-wrap: break-word; position: relative; }
-        .message.sent { background-color: var(--msg-sent-bg); color: var(--msg-sent-text); align-self: flex-end; border-bottom-right-radius: 4px; }
-        .message.received { background-color: var(--msg-recv-bg); color: var(--msg-recv-text); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 5px; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+        input[type="text"] { width: 100%; padding: 12px; border-radius: 20px; border: none; outline: none; background-color: #1e293b; color: white; box-sizing: border-box; }
         
-        /* Media Restraints (FIXES OVERLAPPING) */
-        .media-preview { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; object-fit: contain; display: block; background: #000; }
+        /* Original Chat Bubbles */
+        .message { padding: 10px 14px; border-radius: 18px; margin-bottom: 10px; max-width: 75%; word-wrap: break-word; }
+        .message.sent { background-color: #38bdf8; color: #0b1120; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .message.received { background-color: #1e293b; color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .media-preview { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; object-fit: contain; }
         
-        /* Posts (Global Feed) */
-        .post-card { background-color: var(--bg-header); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border-color); }
-        .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .post-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent); }
-        
-        /* Navigation Tabs */
-        .nav-bar { background-color: var(--bg-header); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border-color); z-index: 10; }
-        .nav-btn { background: none; border: none; color: var(--text-sub); font-size: 16px; font-weight: bold; cursor: pointer; padding: 10px; width: 100%; transition: 0.2s; }
-        .nav-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); padding-bottom: 7px; }
-
-        /* Scrollbars */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
         /* Full Screen Overlays */
-        .fullscreen-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-app); z-index: 50; display: flex; flex-direction: column; }
+        .screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #0b1120; z-index: 50; display: flex; flex-direction: column; }
+        .flex-center { justify-content: center; align-items: center; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="app-container" id="appThemeContainer">
+    <div id="loginScreen" class="screen flex-center">
+        <h1 style="font-size: 50px; color: #38bdf8; margin-bottom: 10px;">DigNex</h1>
+        <p style="color: #94a3b8; margin-bottom: 40px; font-size: 18px;">Connect, Chat, and Share</p>
+        <button id="googleLoginBtn" class="btn btn-blue" style="font-size: 18px; padding: 15px 30px;">Sign in with Google</button>
+    </div>
 
-        <div id="loginScreen" class="fullscreen-overlay flex-center" style="padding: 20px;">
-            <h1 style="font-size: 45px; color: var(--accent); margin-bottom: 10px;">DigNex</h1>
-            <p style="color: var(--text-sub); margin-bottom: 40px;">Connect, Chat, and Share</p>
-            <button id="googleLoginBtn" class="btn btn-blue" style="font-size: 18px; padding: 15px 30px; width: 80%;">Sign in with Google</button>
+    <div id="profileSetupScreen" class="screen flex-center hidden" style="z-index: 60;">
+        <h2 style="color: #38bdf8;">Create Your Profile</h2>
+        <div style="position: relative; margin-bottom: 30px; margin-top: 20px;">
+            <img id="setupAvatarPreview" src="https://via.placeholder.com/150" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #38bdf8;">
+            <button onclick="document.getElementById('setupAvatarInput').click()" class="btn btn-blue" style="position: absolute; bottom: 0; right: 0; border-radius: 50%; padding: 10px;">📷</button>
+            <input type="file" id="setupAvatarInput" accept="image/*" class="hidden" onchange="previewSetupAvatar(event)">
         </div>
+        <input type="text" id="setupNameInput" placeholder="Enter your display name" style="margin-bottom: 20px; text-align: center; font-size: 18px; max-width: 300px;">
+        <p id="setupStatus" style="color: #38bdf8; font-size: 14px; margin-bottom: 15px;"></p>
+        <button onclick="saveProfile()" class="btn btn-blue" style="width: 100%; max-width: 300px; font-size: 18px;">Join DigNex</button>
+    </div>
 
-        <div id="profileSetupScreen" class="fullscreen-overlay flex-center hidden" style="padding: 20px; z-index: 60;">
-            <h2 style="color: var(--accent);">Create Your Profile</h2>
-            <p style="color: var(--text-sub); margin-bottom: 20px;">Let your friends know who you are!</p>
-            
-            <div style="position: relative; margin-bottom: 20px;">
-                <img id="setupAvatarPreview" src="https://via.placeholder.com/120" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent);">
-                <button onclick="document.getElementById('setupAvatarInput').click()" class="btn btn-blue" style="position: absolute; bottom: 0; right: 0; border-radius: 50%; padding: 8px;">📷</button>
-                <input type="file" id="setupAvatarInput" accept="image/*" class="hidden" onchange="previewSetupAvatar(event)">
+    <div id="mainAppScreen" class="screen hidden" style="z-index: 40;">
+        <div style="padding: 15px 20px; background-color: #1e293b; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img id="myAvatar" src="" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #38bdf8;">
+                <h2 id="myName" style="margin: 0; font-size: 18px;"></h2>
             </div>
-
-            <input type="text" id="setupNameInput" placeholder="Enter your display name" style="margin-bottom: 20px; font-size: 18px; text-align: center;">
-            <p id="setupStatus" style="color: var(--accent); font-size: 14px; margin-bottom: 10px;"></p>
-            <button onclick="saveProfile()" class="btn btn-blue" style="width: 100%; font-size: 18px;">Complete Profile</button>
+            <button onclick="document.getElementById('settingsScreen').classList.remove('hidden')" class="btn" style="background: none; font-size: 24px;">⚙️</button>
         </div>
+        <div style="padding: 20px; flex-grow: 1; overflow-y: auto;">
+            <h3 style="color: #94a3b8; font-size: 14px; text-transform: uppercase; margin-bottom: 15px;">Your Friends</h3>
+            <div id="friendsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+    </div>
 
-        <div id="mainAppScreen" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
-            
-            <div style="padding: 15px; background-color: var(--bg-header); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <img id="myAvatar" src="" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent);">
-                    <h2 id="myName" style="margin: 0; font-size: 18px;"></h2>
-                </div>
-                <div>
-                    <button onclick="toggleTheme()" id="themeBtn" class="btn" style="background: none; font-size: 20px;">🌓</button>
-                    <button onclick="document.getElementById('settingsScreen').classList.remove('hidden')" class="btn" style="background: none; font-size: 20px;">⚙️</button>
-                </div>
-            </div>
-
-            <div style="flex-grow: 1; overflow-y: auto; position: relative;">
-                
-                <div id="viewChats" style="padding: 15px;">
-                    <h3 style="color: var(--text-sub); font-size: 13px; text-transform: uppercase; margin-bottom: 15px;">Your Friends</h3>
-                    <div id="friendsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                </div>
-
-                <div id="viewFeed" class="hidden" style="padding: 15px;">
-                    <div style="background-color: var(--bg-header); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color);">
-                        <textarea id="postInput" placeholder="What's on your mind?" style="width: 100%; background: none; border: none; color: var(--text-main); outline: none; resize: none; font-family: inherit; font-size: 16px; margin-bottom: 10px;"></textarea>
-                        
-                        <img id="postImagePreview" class="hidden media-preview">
-                        <video id="postVideoPreview" class="hidden media-preview" controls></video>
-                        <p id="postUploadStatus" style="color: var(--accent); font-size: 12px; margin: 5px 0;"></p>
-
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <input type="file" id="postMediaUpload" accept="image/*, video/*" class="hidden" onchange="previewPostMedia(event)">
-                            <button onclick="document.getElementById('postMediaUpload').click()" class="btn" style="background: none; font-size: 16px; padding: 5px; color: var(--text-sub);">📷 Add Media</button>
-                            <button onclick="createPost()" class="btn btn-blue">Post</button>
-                        </div>
-                    </div>
-                    
-                    <div id="feedTimeline"></div>
-                </div>
-            </div>
-
-            <div class="nav-bar">
-                <button id="tabChats" onclick="switchTab('chats')" class="nav-btn active">💬 Chats</button>
-                <button id="tabFeed" onclick="switchTab('feed')" class="nav-btn">🌍 Feed</button>
+    <div id="chatScreen" class="screen hidden" style="z-index: 50;">
+        <div style="padding: 15px 20px; background-color: #1e293b; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155;">
+            <div style="display: flex; align-items: center;">
+                <button onclick="closeChat()" style="background: none; border: none; color: #38bdf8; font-size: 26px; margin-right: 15px; cursor: pointer;">⬅</button>
+                <img id="chatHeaderAvatar" src="" style="width: 45px; height: 45px; border-radius: 50%; margin-right: 15px; object-fit: cover; border: 2px solid #38bdf8;">
+                <h3 id="chatHeaderName" style="margin: 0; font-size: 18px;"></h3>
             </div>
         </div>
 
-        <div id="chatScreen" class="fullscreen-overlay hidden">
-            
-            <div style="padding: 15px; background-color: var(--bg-header); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color);">
-                <div style="display: flex; align-items: center;">
-                    <button onclick="closeChat()" style="background: none; border: none; color: var(--accent); font-size: 22px; margin-right: 10px; cursor: pointer;">⬅</button>
-                    <img id="chatHeaderAvatar" src="" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover; border: 2px solid var(--accent);">
-                    <h3 id="chatHeaderName" style="margin: 0; font-size: 18px; color: var(--text-main);"></h3>
-                </div>
-                <button onclick="clearCurrentChat()" class="btn btn-red" style="padding: 6px 12px; font-size: 13px;">🗑️ Clear</button>
-            </div>
+        <div id="chatMessages" style="flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column;"></div>
 
-            <div id="chatMessages" style="flex-grow: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column;"></div>
-            
-            <div id="typingIndicator" class="hidden" style="color: var(--text-sub); font-size: 12px; font-style: italic; padding: 0 15px 5px 15px;">
-                Friend is typing...
-            </div>
-
-            <div style="padding: 0 15px; background-color: var(--bg-app);">
-                <img id="chatImagePreview" class="hidden media-preview">
-                <video id="chatVideoPreview" class="hidden media-preview" controls></video>
-                <p id="chatUploadStatus" style="color: var(--accent); font-size: 12px; margin: 5px 0 0 0;"></p>
-            </div>
-
-            <div style="padding: 15px; background-color: var(--bg-header); border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center;">
-                <input type="file" id="chatImageUpload" accept="image/*" class="hidden" onchange="previewChatMedia(event, 'image')">
-                <input type="file" id="chatVideoUpload" accept="video/*" class="hidden" onchange="previewChatMedia(event, 'video')">
-                
-                <button onclick="document.getElementById('chatImageUpload').click()" class="btn" style="background: none; font-size: 22px; padding: 0;">📷</button>
-                <button onclick="document.getElementById('chatVideoUpload').click()" class="btn" style="background: none; font-size: 22px; padding: 0;">🎥</button>
-                
-                <input type="text" id="chatInput" placeholder="Message..." oninput="handleTyping()" onkeypress="if(event.key === 'Enter') sendMessage()" style="flex-grow: 1;">
-                <button onclick="sendMessage()" class="btn btn-blue" style="border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 18px;">➤</button>
-            </div>
+        <div style="padding: 0 20px; background-color: #0b1120;">
+            <img id="chatImagePreview" class="hidden media-preview">
+            <video id="chatVideoPreview" class="hidden media-preview" controls></video>
+            <audio id="chatAudioPreview" class="hidden" controls style="width: 100%; margin-top: 10px;"></audio>
+            <p id="chatUploadStatus" style="color: #38bdf8; font-size: 14px; margin: 5px 0 10px 0;"></p>
         </div>
 
-        <div id="settingsScreen" class="fullscreen-overlay hidden" style="padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 style="margin: 0; color: var(--text-main);">Settings</h2>
-                <button onclick="document.getElementById('settingsScreen').classList.add('hidden')" class="btn btn-red">Close</button>
-            </div>
+        <div style="padding: 15px 20px; background-color: #1e293b; border-top: 1px solid #334155; display: flex; gap: 10px; align-items: center;">
+            <input type="file" id="chatImageUpload" accept="image/*" class="hidden" onchange="previewChatMedia(event, 'image')">
+            <input type="file" id="chatVideoUpload" accept="video/*" class="hidden" onchange="previewChatMedia(event, 'video')">
+            <input type="file" id="chatAudioUpload" accept="audio/*" class="hidden" onchange="previewChatMedia(event, 'audio')">
             
-            <div style="background-color: var(--bg-header); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px;">
-                <h3 style="margin-top: 0;">Push Notifications</h3>
-                <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 15px;">Receive alerts when your friends message you.</p>
-                <button onclick="requestNotificationPermission()" class="btn btn-blue" style="width: 100%;">🔔 Enable Notifications</button>
-            </div>
-
-            <button id="logoutBtn" class="btn btn-red" style="width: 100%;">Log Out</button>
+            <button onclick="document.getElementById('chatImageUpload').click()" class="btn" style="background: none; font-size: 22px; padding: 0;">📷</button>
+            <button onclick="document.getElementById('chatVideoUpload').click()" class="btn" style="background: none; font-size: 22px; padding: 0;">🎥</button>
+            <button onclick="document.getElementById('chatAudioUpload').click()" class="btn" style="background: none; font-size: 22px; padding: 0;">🎵</button>
+            
+            <input type="text" id="chatInput" placeholder="Message..." onkeypress="if(event.key === 'Enter') sendMessage()" style="flex-grow: 1;">
+            <button onclick="sendMessage()" class="btn btn-blue" style="border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 18px;">➤</button>
         </div>
+    </div>
 
-    </div> <script type="module">
+    <div id="settingsScreen" class="screen hidden" style="z-index: 60; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 style="margin: 0;">Settings</h2>
+            <button onclick="document.getElementById('settingsScreen').classList.add('hidden')" class="btn btn-red">Close</button>
+        </div>
+        <div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+            <h3 style="margin-top: 0;">Push Notifications</h3>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Receive alerts when your friends message you.</p>
+            <button onclick="requestNotificationPermission()" class="btn btn-blue" style="width: 100%;">🔔 Enable Notifications</button>
+        </div>
+        <button id="logoutBtn" class="btn btn-red" style="width: 100%;">Log Out</button>
+    </div>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, updateDoc, deleteDoc, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js";
 
-        // ⚠️ PASTE YOUR EXACT FIREBASE CONFIG HERE ⚠️
+        // ⚠️ ORIGINAL FIREBASE CONFIG ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCiF_rlhJO8TO3RJ2G4OaG9SOZoGgPpvhk",
             authDomain: "dignex-88f5b.firebaseapp.com",
@@ -247,41 +122,24 @@
             storageBucket: "dignex-88f5b.firebasestorage.app",
             messagingSenderId: "1039498013474",
             appId: "1:1039498013474:web:2299eefcfc750de54f537b"
-};
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const messaging = getMessaging(app);
 
-        // Global Variables
         let currentUser = null;
         let digNexProfile = null;
         let currentChatFriendId = null;
         let chatUnsubscribe = null;
-        let typingUnsubscribe = null;
-        let typingTimeout = null;
 
-        // --- Theme Engine ---
-        function applySavedTheme() {
-            const isLight = localStorage.getItem('dignex_theme') === 'light';
-            if (isLight) document.getElementById('appThemeContainer').classList.add('light-theme');
-        }
-        applySavedTheme();
+        // ⚠️ ORIGINAL CLOUDINARY CONFIG ⚠️
+        const CLOUDINARY_UPLOAD_PRESET = "dcyl66lfc";
+        const CLOUDINARY_CLOUD_NAME = "lzxuzi3d";
 
-        window.toggleTheme = () => {
-            const container = document.getElementById('appThemeContainer');
-            container.classList.toggle('light-theme');
-            const isLight = container.classList.contains('light-theme');
-            localStorage.setItem('dignex_theme', isLight ? 'light' : 'dark');
-        };
-
-        // --- Cloudinary Upload Function ---
-        const CLOUDINARY_UPLOAD_PRESET = "dcyl66lfc"; // ⚠️ PASTE HERE
-        const CLOUDINARY_CLOUD_NAME = "lzxuzi3d";       // ⚠️ PASTE HERE
-
-        async function uploadToCloudinary(file, resourceType) {
-            const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
+        async function uploadToCloudinary(file) {
+            const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
             const fd = new FormData();
             fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
             fd.append('file', file);
@@ -292,7 +150,7 @@
             } catch (error) { console.error("Cloudinary failed:", error); return null; }
         }
 
-        // --- Authentication & Profile Setup ---
+        // --- Auth & Profile Setup ---
         document.getElementById('googleLoginBtn').addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider()).catch(err => alert("Login failed: " + err.message));
         });
@@ -304,24 +162,20 @@
                 currentUser = user;
                 document.getElementById('loginScreen').classList.add('hidden');
                 
-                // Check if profile exists
                 const userDocRef = doc(db, "users", user.uid);
                 const userSnap = await getDoc(userDocRef);
 
                 if (!userSnap.exists() || !userSnap.data().customName) {
-                    // Show Profile Creation Screen
                     document.getElementById('profileSetupScreen').classList.remove('hidden');
                     document.getElementById('setupNameInput').value = user.displayName || "";
                     if(user.photoURL) document.getElementById('setupAvatarPreview').src = user.photoURL;
                 } else {
-                    // Profile exists, load app
                     digNexProfile = userSnap.data();
+                    document.getElementById('profileSetupScreen').classList.add('hidden');
                     bootApp();
                 }
             } else {
-                // Logged out
-                currentUser = null;
-                digNexProfile = null;
+                currentUser = null; digNexProfile = null;
                 document.getElementById('loginScreen').classList.remove('hidden');
                 document.getElementById('mainAppScreen').classList.add('hidden');
                 document.getElementById('chatScreen').classList.add('hidden');
@@ -330,14 +184,12 @@
             }
         });
 
-        // --- Profile Creation Logic ---
         let setupAvatarFile = null;
-        
         window.previewSetupAvatar = (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            setupAvatarFile = file;
-            document.getElementById('setupAvatarPreview').src = URL.createObjectURL(file);
+            if(event.target.files[0]) {
+                setupAvatarFile = event.target.files[0];
+                document.getElementById('setupAvatarPreview').src = URL.createObjectURL(setupAvatarFile);
+            }
         };
 
         window.saveProfile = async () => {
@@ -349,117 +201,26 @@
 
             if (setupAvatarFile) {
                 statusText.innerText = "Uploading avatar...";
-                const uploadedUrl = await uploadToCloudinary(setupAvatarFile, 'image');
+                const uploadedUrl = await uploadToCloudinary(setupAvatarFile);
                 if (uploadedUrl) finalAvatarUrl = uploadedUrl;
             }
 
             statusText.innerText = "Saving profile...";
             digNexProfile = { customName: nameInput, avatarBase64: finalAvatarUrl, uid: currentUser.uid };
-            
             await setDoc(doc(db, "users", currentUser.uid), digNexProfile, { merge: true });
             
             document.getElementById('profileSetupScreen').classList.add('hidden');
             bootApp();
         };
 
-        // --- App Boot Sequence ---
         function bootApp() {
             document.getElementById('mainAppScreen').classList.remove('hidden');
             document.getElementById('myName').innerText = digNexProfile.customName;
             document.getElementById('myAvatar').src = digNexProfile.avatarBase64;
             loadFriendsList();
-            loadGlobalFeed();
         }
 
-        // --- Navigation Tabs ---
-        window.switchTab = (tab) => {
-            if (tab === 'chats') {
-                document.getElementById('viewChats').classList.remove('hidden');
-                document.getElementById('viewFeed').classList.add('hidden');
-                document.getElementById('tabChats').classList.add('active');
-                document.getElementById('tabFeed').classList.remove('active');
-            } else {
-                document.getElementById('viewFeed').classList.remove('hidden');
-                document.getElementById('viewChats').classList.add('hidden');
-                document.getElementById('tabFeed').classList.add('active');
-                document.getElementById('tabChats').classList.remove('active');
-            }
-        };
-
-        // --- The Global Feed ---
-        let postSelectedFile = null;
-        let postSelectedFileType = null;
-
-        window.previewPostMedia = (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            postSelectedFile = file;
-            postSelectedFileType = file.type.startsWith('video/') ? 'video' : 'image';
-            
-            const imgPreview = document.getElementById('postImagePreview');
-            const vidPreview = document.getElementById('postVideoPreview');
-            
-            if(postSelectedFileType === 'image') {
-                imgPreview.src = URL.createObjectURL(file); imgPreview.classList.remove('hidden'); vidPreview.classList.add('hidden');
-            } else {
-                vidPreview.src = URL.createObjectURL(file); vidPreview.classList.remove('hidden'); imgPreview.classList.add('hidden');
-            }
-        };
-
-        window.createPost = async () => {
-            const text = document.getElementById('postInput').value.trim();
-            if (text === "" && !postSelectedFile) return;
-
-            const statusLabel = document.getElementById('postUploadStatus');
-            document.getElementById('postInput').value = "";
-            let mediaUrl = null;
-
-            if (postSelectedFile) {
-                statusLabel.innerText = "Uploading media to Feed...";
-                mediaUrl = await uploadToCloudinary(postSelectedFile, postSelectedFileType);
-                postSelectedFile = null;
-                document.getElementById('postImagePreview').classList.add('hidden');
-                document.getElementById('postVideoPreview').classList.add('hidden');
-                document.getElementById('postMediaUpload').value = "";
-            }
-
-            statusLabel.innerText = "Posting...";
-            await addDoc(collection(db, "posts"), {
-                authorId: currentUser.uid, authorName: digNexProfile.customName, authorAvatar: digNexProfile.avatarBase64,
-                text: text, mediaUrl: mediaUrl, mediaType: postSelectedFileType, timestamp: serverTimestamp(),
-            });
-            statusLabel.innerText = "";
-        };
-
-        function loadGlobalFeed() {
-            onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc"), limit(50)), (snapshot) => {
-                const timeline = document.getElementById('feedTimeline');
-                timeline.innerHTML = "";
-                snapshot.forEach((docSnap) => {
-                    const post = docSnap.data();
-                    const div = document.createElement('div');
-                    div.className = "post-card";
-                    
-                    let mediaHtml = "";
-                    if (post.mediaUrl) {
-                        if (post.mediaType === 'image') mediaHtml = `<img src="${post.mediaUrl}" class="media-preview" style="width:100%;">`;
-                        if (post.mediaType === 'video') mediaHtml = `<video src="${post.mediaUrl}" controls class="media-preview" style="width:100%;"></video>`;
-                    }
-
-                    div.innerHTML = `
-                        <div class="post-header">
-                            <img src="${post.authorAvatar}" class="post-avatar">
-                            <div><strong style="display:block; color:var(--text-main);">${post.authorName}</strong></div>
-                        </div>
-                        <div style="font-size:15px; word-wrap:break-word; color:var(--text-main);">${post.text || ''}</div>
-                        ${mediaHtml}
-                    `;
-                    timeline.appendChild(div);
-                });
-            });
-        }
-
-        // --- Friends List ---
+        // --- Friend List ---
         function loadFriendsList() {
             onSnapshot(collection(db, "users"), (snapshot) => {
                 const list = document.getElementById('friendsList');
@@ -468,12 +229,12 @@
                     const friend = docSnap.data();
                     if (friend.uid !== currentUser.uid && friend.customName) {
                         const div = document.createElement('div');
-                        div.style.cssText = "display:flex; align-items:center; padding:12px; background-color:var(--bg-header); border-radius:12px; cursor:pointer; border:1px solid var(--border-color);";
-                        div.onclick = () => openChat(friend.uid, friend.customName, friend.avatarBase64);
+                        div.style.cssText = "display:flex; align-items:center; padding:15px; background-color:#1e293b; border-radius:12px; cursor:pointer;";
                         div.innerHTML = `
-                            <img src="${friend.avatarBase64}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; margin-right:15px; border:1px solid var(--border-color);">
-                            <span style="font-weight:bold; font-size:16px; color:var(--text-main);">${friend.customName}</span>
+                            <img src="${friend.avatarBase64}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-right:15px; border:2px solid transparent;">
+                            <span style="font-weight:bold; font-size:18px;">${friend.customName}</span>
                         `;
+                        div.onclick = () => openChat(friend.uid, friend.customName, friend.avatarBase64);
                         list.appendChild(div);
                     }
                 });
@@ -481,82 +242,61 @@
         }
 
         // --- Chat Interface ---
-        let chatSelectedFile = null;
+        let chatSelectedFile = null; 
         let chatSelectedFileType = null;
 
         window.openChat = (friendId, friendName, friendAvatar) => {
             currentChatFriendId = friendId;
-            document.getElementById('chatHeaderName').innerText = friendName;
+            document.getElementById('chatHeaderName').innerText = friendName; 
             document.getElementById('chatHeaderAvatar').src = friendAvatar;
             document.getElementById('chatScreen').classList.remove('hidden');
-
+            
             const chatId = currentUser.uid < friendId ? `${currentUser.uid}_${friendId}` : `${friendId}_${currentUser.uid}`;
-            
             if (chatUnsubscribe) chatUnsubscribe();
-            if (typingUnsubscribe) typingUnsubscribe();
             
-            // Typing Listener
-            typingUnsubscribe = onSnapshot(doc(db, "chats", chatId), (docSnap) => {
-                const typingUI = document.getElementById('typingIndicator');
-                if (docSnap.exists() && docSnap.data()[`typing_${friendId}`] === true) {
-                    typingUI.innerText = `${friendName} is typing...`; typingUI.classList.remove('hidden');
-                } else { typingUI.classList.add('hidden'); }
-            });
-
-            // Message Listener & Read Receipts
             chatUnsubscribe = onSnapshot(query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc")), (snapshot) => {
-                const chatArea = document.getElementById('chatMessages');
+                const chatArea = document.getElementById('chatMessages'); 
                 chatArea.innerHTML = "";
-                
                 snapshot.forEach((docSnap) => {
-                    const msg = docSnap.data();
+                    const msg = docSnap.data(); 
                     const isMe = msg.senderId === currentUser.uid;
-                    
-                    if (!isMe && msg.read === false) updateDoc(doc(db, "chats", chatId, "messages", docSnap.id), { read: true });
 
-                    const div = document.createElement('div');
+                    const div = document.createElement('div'); 
                     div.className = `message ${isMe ? 'sent' : 'received'}`;
-                    
                     let content = "";
+                    
                     if (msg.mediaUrl) {
                         if (msg.mediaType === 'image') content += `<img src="${msg.mediaUrl}" class="media-preview"><br>`;
-                        if (msg.mediaType === 'video') content += `<video src="${msg.mediaUrl}" controls class="media-preview"></video><br>`;
+                        else if (msg.mediaType === 'video') content += `<video src="${msg.mediaUrl}" controls class="media-preview"></video><br>`;
+                        else if (msg.mediaType === 'audio') content += `<audio src="${msg.mediaUrl}" controls style="max-width:100%; margin-top:5px;"></audio><br>`;
                     }
-                    if (msg.text) content += msg.text;
+                    if (msg.text) content += `<span style="font-size: 16px;">${msg.text}</span>`;
 
-                    let ticksHtml = isMe ? (msg.read ? `<span style="color:#a5f3fc; font-weight:bold;">✓✓</span>` : `<span style="color:#e2e8f0;">✓</span>`) : "";
-                    content += `<div class="msg-time">${ticksHtml}</div>`;
-                    
-                    div.innerHTML = content;
+                    div.innerHTML = content; 
                     chatArea.appendChild(div);
                 });
                 chatArea.scrollTop = chatArea.scrollHeight;
             });
         };
 
-        window.closeChat = () => {
-            document.getElementById('chatScreen').classList.add('hidden');
-            currentChatFriendId = null;
-            if (chatUnsubscribe) chatUnsubscribe();
-            if (typingUnsubscribe) typingUnsubscribe();
-        };
-
-        window.handleTyping = () => {
-            if(!currentChatFriendId) return;
-            const chatId = currentUser.uid < currentChatFriendId ? `${currentUser.uid}_${currentChatFriendId}` : `${currentChatFriendId}_${currentUser.uid}`;
-            setDoc(doc(db, "chats", chatId), { [`typing_${currentUser.uid}`]: true }, { merge: true });
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => setDoc(doc(db, "chats", chatId), { [`typing_${currentUser.uid}`]: false }, { merge: true }), 2000);
+        window.closeChat = () => { 
+            document.getElementById('chatScreen').classList.add('hidden'); 
+            currentChatFriendId = null; 
+            if (chatUnsubscribe) chatUnsubscribe(); 
         };
 
         window.previewChatMedia = (event, type) => {
-            const file = event.target.files[0];
-            if (!file) return;
+            const file = event.target.files[0]; if (!file) return;
             chatSelectedFile = file; chatSelectedFileType = type;
-            const imgPreview = document.getElementById('chatImagePreview');
-            const vidPreview = document.getElementById('chatVideoPreview');
-            if (type === 'image') { imgPreview.src = URL.createObjectURL(file); imgPreview.classList.remove('hidden'); vidPreview.classList.add('hidden'); }
-            else { vidPreview.src = URL.createObjectURL(file); vidPreview.classList.remove('hidden'); imgPreview.classList.add('hidden'); }
+            const imgPre = document.getElementById('chatImagePreview'); 
+            const vidPre = document.getElementById('chatVideoPreview'); 
+            const audPre = document.getElementById('chatAudioPreview');
+            
+            imgPre.classList.add('hidden'); vidPre.classList.add('hidden'); audPre.classList.add('hidden');
+            
+            if (type === 'image') { imgPre.src = URL.createObjectURL(file); imgPre.classList.remove('hidden'); }
+            else if (type === 'video') { vidPre.src = URL.createObjectURL(file); vidPre.classList.remove('hidden'); }
+            else if (type === 'audio') { audPre.src = URL.createObjectURL(file); audPre.classList.remove('hidden'); }
         };
 
         window.sendMessage = async () => {
@@ -569,50 +309,61 @@
             
             let chatMediaUrl = null;
             if (chatSelectedFile) {
-                statusLabel.innerText = chatSelectedFileType === 'video' ? "Sending Video..." : "Sending Photo...";
-                chatMediaUrl = await uploadToCloudinary(chatSelectedFile, chatSelectedFileType); 
-                chatSelectedFile = null; chatSelectedFileType = null;
-                document.getElementById('chatImagePreview').classList.add('hidden'); document.getElementById('chatVideoPreview').classList.add('hidden');
-                document.getElementById('chatImageUpload').value = ''; document.getElementById('chatVideoUpload').value = '';
+                statusLabel.innerText = "Uploading attachment...";
+                chatMediaUrl = await uploadToCloudinary(chatSelectedFile); 
+                chatSelectedFile = null; 
+                document.getElementById('chatImagePreview').classList.add('hidden'); 
+                document.getElementById('chatVideoPreview').classList.add('hidden'); 
+                document.getElementById('chatAudioPreview').classList.add('hidden');
+                document.getElementById('chatImageUpload').value = ''; 
+                document.getElementById('chatVideoUpload').value = ''; 
+                document.getElementById('chatAudioUpload').value = '';
             }
             
             if (chatMediaUrl || text !== "") {
                 const chatId = currentUser.uid < currentChatFriendId ? `${currentUser.uid}_${currentChatFriendId}` : `${currentChatFriendId}_${currentUser.uid}`;
-                await addDoc(collection(db, "chats", chatId, "messages"), { senderId: currentUser.uid, text: text, mediaUrl: chatMediaUrl, mediaType: chatSelectedFileType, timestamp: serverTimestamp(), read: false });
+                await addDoc(collection(db, "chats", chatId, "messages"), { 
+                    senderId: currentUser.uid, text: text, mediaUrl: chatMediaUrl, mediaType: chatSelectedFileType, timestamp: serverTimestamp() 
+                });
                 
-                // Push Notification
+                // --- ORIGINAL NETLIFY PUSH NOTIFICATION TRIGGER ---
                 try {
                     const friendDoc = await getDoc(doc(db, "users", currentChatFriendId));
                     if (friendDoc.data() && friendDoc.data().fcmToken) {
-                        fetch('/.netlify/functions/sendPush', { method: 'POST', body: JSON.stringify({ token: friendDoc.data().fcmToken, title: `New message from ${digNexProfile.customName}`, body: text !== "" ? text : "Sent an attachment" }) });
+                        fetch('/.netlify/functions/sendPush', { 
+                            method: 'POST', 
+                            body: JSON.stringify({ 
+                                token: friendDoc.data().fcmToken, 
+                                title: `New message from ${digNexProfile.customName}`, 
+                                body: text !== "" ? text : "Sent an attachment" 
+                            }) 
+                        });
                     }
-                } catch (err) {}
+                } catch (err) { console.error("Push Error:", err); }
             }
             statusLabel.innerText = "";
+            chatSelectedFileType = null;
         };
 
-        window.clearCurrentChat = async () => {
-            if (!currentChatFriendId || !currentUser) return;
-            if (!confirm("Are you sure you want to clear this chat?")) return;
-            const chatId = currentUser.uid < currentChatFriendId ? `${currentUser.uid}_${currentChatFriendId}` : `${currentChatFriendId}_${currentUser.uid}`;
-            const messagesRef = collection(db, "chats", chatId, "messages");
-            try {
-                const snapshot = await getDocs(messagesRef);
-                snapshot.forEach((docSnap) => deleteDoc(doc(db, "chats", chatId, "messages", docSnap.id)));
-            } catch (error) { alert("Failed to clear chat."); }
-        };
-
-        // --- Push Notifications ---
+        // --- Push Notification Registration ---
         window.requestNotificationPermission = async () => {
             try {
-                const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+                const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js'); 
                 await navigator.serviceWorker.ready;
-                const currentToken = await getToken(messaging, { vapidKey: "BOEJshwyI0lNpsEspDyuVG7M95DmColVvtcZWCWX85wCfbUd6F30L7N39oyBXP0o_gq55R1Qen1JPcglhznq2lU", serviceWorkerRegistration: registration });
-                if (currentToken && currentUser) {
-                    await updateDoc(doc(db, "users", currentUser.uid), { fcmToken: currentToken });
-                    alert("SUCCESS! Notifications Enabled! 🎉");
+                
+                // ⚠️ PASTE YOUR VAPID KEY BELOW ⚠️
+                const currentToken = await getToken(messaging, { 
+                    vapidKey: "BOEJshwyI0lNpsEspDyuVG7M95DmColVvtcZWCWX85wCfbUd6F30L7N39oyBXP0o_gq55R1Qen1JPcglhznq2lU", 
+                    serviceWorkerRegistration: registration 
+                });
+                
+                if (currentToken && currentUser) { 
+                    await updateDoc(doc(db, "users", currentUser.uid), { fcmToken: currentToken }); 
+                    alert("SUCCESS! Notifications Enabled! 🎉"); 
                 }
-            } catch (error) { alert("ERROR: " + error.message); }
+            } catch (error) { 
+                alert("ERROR: " + error.message); 
+            }
         };
     </script>
 </body>
