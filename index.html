@@ -2,367 +2,141 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: wss: data: blob: 'unsafe-inline' 'unsafe-eval';">
     <title>DigNex</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0b1120">
-    <link rel="apple-touch-icon" href="logo.png">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💠</text></svg>">
-    
     <style>
-        /* --- DYNAMIC THEME SYSTEM --- */
-        :root {
-            --bg-color: #0b1120; 
-            --card-bg: rgba(30, 41, 59, 0.8);
-            --accent: #6366f1; 
-            --accent-hover: #4f46e5;
-            --text-main: #f8fafc; 
-            --text-muted: #94a3b8;
-            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-            --success: #10b981; 
-            --danger: #ef4444;
-            --menu-bg: rgba(30, 41, 59, 0.98);
-        }
-
-        body.light-mode {
-            --bg-color: #f4f5f0; 
-            --card-bg: #ffffff; 
-            --accent: #557A46; 
-            --accent-hover: #3E5A32;
-            --text-main: #1c201a; 
-            --text-muted: #6b7280;
-            --glass-border: 1px solid rgba(0, 0, 0, 0.1);
-            --menu-bg: rgba(255, 255, 255, 0.98);
-        }
-
-        /* --- CORE ARCHITECTURE --- */
-        *, *::before, *::after { box-sizing: border-box; }
-        body { 
-            margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; 
-            background-color: var(--bg-color); color: var(--text-main); 
-            display: flex; height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; 
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        input, textarea, select { font-size: 16px !important; color: var(--text-main); }
-        body.light-mode input, body.light-mode textarea, body.light-mode select { background: rgba(0,0,0,0.05); }
-
-        /* --- MOBILE TOP HEADER --- */
-        .mobile-top-header {
-            display: none; justify-content: center; align-items: center; 
-            width: 100%; height: 55px; background: var(--card-bg); 
-            border-bottom: var(--glass-border); z-index: 100; flex-shrink: 0;
-            backdrop-filter: blur(10px);
-        }
-
-        /* --- LEFT SIDEBAR / NAV --- */
-        .sidebar-left { 
-            width: 250px; flex-shrink: 0; border-right: var(--glass-border); padding: 20px; 
-            display: flex; flex-direction: column; gap: 15px; background: rgba(15, 23, 42, 0.5); z-index: 100;
-        }
-        body.light-mode .sidebar-left { background: rgba(255, 255, 255, 0.5); }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: white; overflow: hidden; }
+        .hidden { display: none !important; }
+        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-blue { background-color: #3b82f6; color: white; }
+        .btn-red { background-color: #ef4444; color: white; }
+        .btn:active { transform: scale(0.95); }
+        .message { padding: 10px 14px; border-radius: 18px; margin-bottom: 10px; max-width: 75%; word-wrap: break-word; position: relative; }
+        .message.sent { background-color: #3b82f6; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .message.received { background-color: #334155; color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 5px; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+        .media-preview { max-width: 200px; border-radius: 8px; margin-top: 5px; }
+        input[type="text"] { width: 100%; padding: 12px; border-radius: 20px; border: none; outline: none; background-color: #1e293b; color: white; box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
         
-        .brand-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .logo { font-size: 28px; font-weight: 900; background: linear-gradient(to right, var(--accent), #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; letter-spacing: 1px;}
+        /* Post Styling */
+        .post-card { background-color: #1e293b; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .post-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
         
-        .nav-item { position: relative; font-size: 16px; font-weight: 600; padding: 12px 15px; border-radius: 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
-        .nav-item:hover { background: rgba(128,128,128,0.1); color: var(--accent); }
-        .badge { background: #ef4444; color: white; font-size: 11px; font-weight: bold; padding: 2px 7px; border-radius: 20px; margin-left: auto; display: none; box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);}
-
-        button { cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
-        .btn-main { background-color: var(--accent); color: white; padding: 10px 20px; border-radius: 20px; width: 100%; margin-top: auto;}
-        .btn-main:hover { background-color: var(--accent-hover); }
-
-        /* --- CENTER AREA --- */
-        .center-column { 
-            flex: 1; min-width: 0; height: 100%; overflow-y: auto; padding: 20px; 
-            display: flex; flex-direction: column; position: relative; -webkit-overflow-scrolling: touch; 
-        }
-        
-        /* CREATE POST PAGE */
-        .create-post-container { background: var(--card-bg); padding: 20px; border-radius: 20px; border: var(--glass-border); width: 100%; }
-        textarea { width: 100%; background: transparent; border: none; resize: none; outline: none; margin-bottom: 15px; font-family: inherit; min-height: 100px;}
-        .privacy-select { background: rgba(128,128,128,0.1); border: var(--glass-border); color: var(--text-main); padding: 8px 12px; border-radius: 15px; outline: none; cursor: pointer; margin-right: 10px; }
-        .privacy-select option { background: var(--card-bg); color: var(--text-main); }
-        .media-buttons { display: flex; gap: 10px; border-top: var(--glass-border); padding-top: 15px; align-items: center; flex-wrap: wrap; }
-        .media-btn { background: rgba(128,128,128,0.1); color: var(--accent); padding: 8px 15px; border-radius: 15px; font-size: 14px; display: flex; align-items: center; gap: 5px;}
-        .media-btn:hover { background: rgba(128,128,128,0.2); }
-        #imagePreview, #videoPreview { max-width: 100%; max-height: 300px; border-radius: 10px; display: none; margin-bottom: 15px; background: rgba(0,0,0,0.1); object-fit: contain;}
-        
-        /* HOME FEED */
-        .feed-area { display: flex; flex-direction: column; gap: 20px; max-width: 600px; width: 100%; margin: 0 auto; padding-bottom: 30px;}
-        .post-card { background: var(--card-bg); border: var(--glass-border); padding: 20px; border-radius: 20px; overflow-wrap: break-word; word-break: break-word; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
-        .post-header { font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;}
-        .post-avatar { width: 40px; height: 40px; background: var(--accent); border-radius: 50%; object-fit: cover; flex-shrink: 0; cursor: pointer; }
-        .post-media { width: 100%; border-radius: 15px; margin-top: 15px; max-height: 400px; object-fit: contain; background: rgba(0,0,0,0.1); }
-        
-        .action-link { background: none; color: var(--text-muted); font-size: 14px; cursor: pointer; padding: 8px 12px; border-radius: 10px; font-weight: 600; display: flex; align-items: center; gap: 5px;}
-        .action-link:hover { color: var(--text-main); background: rgba(128,128,128,0.1); }
-        .action-link.danger:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
-        .action-link.liked { color: #ef4444; }
-
-        .comments-section { display: none; margin-top: 15px; border-top: var(--glass-border); padding-top: 15px; }
-        .comment-input-area { display: flex; gap: 10px; margin-top: 10px; }
-        .comment-input-area input { flex: 1; background: rgba(128,128,128,0.1); border: var(--glass-border); color: var(--text-main); padding: 10px 15px; border-radius: 20px; outline: none; }
-
-        /* NOTIFICATIONS VIEW */
-        #notificationsView { display: none; flex-direction: column; max-width: 600px; width: 100%; margin: 0 auto; }
-        .notif-card { background: var(--card-bg); border: var(--glass-border); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer;}
-        .notif-card:hover { filter: brightness(1.1); }
-        .notif-unread { border-left: 4px solid var(--accent); }
-
-        /* USER PROFILE VIEW */
-        #userProfileView { display: none; flex-direction: column; max-width: 600px; width: 100%; margin: 0 auto; }
-        .profile-banner { background: var(--card-bg); padding: 40px 20px; border-radius: 20px; border: var(--glass-border); margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 15px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .profile-banner-avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent); background: var(--bg-color); }
-        .profile-back-btn { position: absolute; top: 15px; left: 15px; background: rgba(128,128,128,0.2); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; color: var(--text-main); border: none; }
-
-        /* CHAT VIEW */
-        #chatView { display: none; flex-direction: column; height: 100%; max-width: 800px; margin: 0 auto; width: 100%; background: var(--card-bg); border-radius: 20px; border: var(--glass-border); overflow: hidden; position: relative;}
-        .chat-header { padding: 15px 20px; background: rgba(128,128,128,0.1); border-bottom: var(--glass-border); display: flex; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; flex-shrink: 0;}
-        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch;}
-        
-        .chat-bubble-wrapper { max-width: 85%; display: flex; flex-direction: column; cursor: pointer; user-select: none; -webkit-user-select: none; }
-        .chat-bubble-wrapper.sent { align-self: flex-end; align-items: flex-end; }
-        .chat-bubble-wrapper.received { align-self: flex-start; align-items: flex-start; }
-        .chat-bubble { padding: 12px 18px; border-radius: 18px; overflow-wrap: break-word; word-break: break-word; line-height: 1.4; transition: opacity 0.2s;}
-        .chat-bubble:active { opacity: 0.7; } 
-        .msg-sent { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
-        .msg-received { background: rgba(128,128,128,0.1); border: var(--glass-border); border-bottom-left-radius: 4px; }
-        .chat-media { max-width: 100%; border-radius: 10px; margin-top: 8px; }
-        
-        .chat-input-area { padding: 12px; background: rgba(128,128,128,0.1); border-top: var(--glass-border); display: flex; align-items: center; gap: 8px; flex-shrink: 0;}
-        .chat-input-area input[type="text"] { flex: 1; background: rgba(128,128,128,0.1); border: var(--glass-border); color: var(--text-main); padding: 12px 15px; border-radius: 25px; outline: none; min-width: 0;}
-        .action-icon { background:none; color:var(--text-muted); font-size: 22px; cursor: pointer; transition: 0.2s; padding: 5px; flex-shrink: 0;}
-        .recording { color: #ef4444 !important; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* CONTEXT MENU */
-        .context-menu {
-            display: none; position: fixed; background: var(--menu-bg); border: var(--glass-border);
-            border-radius: 12px; z-index: 2000; flex-direction: column; overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3); backdrop-filter: blur(10px); min-width: 150px;
-        }
-        .context-menu button { background: none; border: none; color: var(--text-main); padding: 15px 20px; text-align: left; font-size: 16px; cursor: pointer; display: flex; gap: 10px; align-items: center; }
-        .context-menu button.danger { color: var(--danger); }
-
-        /* --- RIGHT SIDEBAR --- */
-        .sidebar-right { 
-            width: 300px; flex-shrink: 0; border-left: var(--glass-border); padding: 20px; 
-            background: rgba(15, 23, 42, 0.5); overflow-y: auto; display: flex; flex-direction: column; gap: 20px; transition: 0.3s ease; 
-        }
-        body.light-mode .sidebar-right { background: rgba(255,255,255,0.5); }
-
-        .search-box { background: rgba(128,128,128,0.1); border: var(--glass-border); padding: 12px 15px; border-radius: 20px; color: var(--text-main); width: 100%; outline: none; }
-        .friend-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; border-radius: 12px; background: rgba(128,128,128,0.05); border: var(--glass-border); }
-        .friend-info { display: flex; align-items: center; gap: 10px; overflow: hidden; cursor: pointer;}
-        .friend-avatar { width: 35px; height: 35px; background: var(--accent); border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-        .friend-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; font-size: 14px;}
-        .btn-small { padding: 6px 10px; border-radius: 15px; font-size: 12px; color: white; }
-        .bg-accent { background: var(--accent); } .bg-success { background: var(--success); } .bg-danger { background: var(--danger); }
-
-        /* --- MOBILE LAYOUT --- */
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .mobile-top-header { display: flex; }
-            .center-column { flex: 1; padding: 10px; padding-bottom: 0; height: calc(100dvh - 125px); }
-            #chatView { border-radius: 0; border: none; height: 100%; max-height: calc(100dvh - 125px); }
-            
-            .sidebar-left { 
-                flex-direction: row; justify-content: space-around; align-items: center; 
-                height: 70px; width: 100%; padding: 5px; border-right: none; border-top: var(--glass-border); 
-                background: var(--card-bg); position: fixed; bottom: 0; left: 0; padding-bottom: env(safe-area-inset-bottom);
-            }
-            .nav-item { padding: 10px; flex-direction: column; gap: 2px; }
-            .nav-item span { display: none; } 
-            .badge { position: absolute; top: 0px; right: 0px; transform: none; font-size: 10px; padding: 2px 6px; }
-            
-            .brand-header, #userInfo span { display: none; }
-            #loginBtn { width: auto; margin: 0; padding: 8px 12px; font-size: 12px; }
-            #userInfo { margin: 0; flex-direction: row; }
-            
-            .sidebar-right { position: fixed; top: 0; right: -100%; width: 85%; max-width: 350px; height: 100dvh; z-index: 200; box-shadow: -5px 0 25px rgba(0,0,0,0.5); background: var(--bg-color); }
-            .sidebar-right.active { right: 0; }
-        }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 3000; justify-content: center; align-items: center; padding: 20px;}
-        .modal-content { background: var(--bg-color); border: var(--glass-border); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
+        /* Nav Bar Styling */
+        .nav-bar { background-color: #1e293b; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid #334155; }
+        .nav-btn { background: none; border: none; color: #94a3b8; font-size: 16px; font-weight: bold; cursor: pointer; padding: 10px; width: 100%; }
+        .nav-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; }
     </style>
 </head>
 <body>
 
-    <div class="mobile-top-header">
-        <h1 class="logo" style="font-size: 22px;">DigNex</h1>
+    <div id="loginScreen" style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+        <h1 style="font-size: 40px; color: #38bdf8; margin-bottom: 10px;">DigNex</h1>
+        <p style="color: #94a3b8; margin-bottom: 30px;">Connect, Chat, and Share</p>
+        <button id="googleLoginBtn" class="btn btn-blue" style="font-size: 18px; padding: 15px 30px;">Sign in with Google</button>
     </div>
 
-    <div id="customContextMenu" class="context-menu"></div>
-
-    <div class="modal-overlay" id="profileModal">
-        <div class="modal-content">
-            <h2 style="margin: 0;">⚙️ Settings</h2>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.1); padding: 10px; border-radius: 15px;">
-                <span style="font-weight: bold;">App Theme</span>
-                <button class="btn-small bg-accent" id="themeToggleBtn" onclick="toggleTheme()">☀️ Light Mode</button>
+    <div id="mainAppScreen" class="hidden" style="height: 100vh; display: flex; flex-direction: column;">
+        <div style="padding: 15px; background-color: #1e293b; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img id="myAvatar" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #38bdf8;">
+                <h2 id="myName" style="margin: 0; font-size: 18px;"></h2>
             </div>
-            
-            <hr style="border: 0; border-top: var(--glass-border); width: 100%; margin: 5px 0;">
-            
-            <label style="font-size: 12px; color: var(--text-muted);">Profile Picture</label>
-            <input type="file" id="avatarUploadInput" accept="image/*" style="font-size: 14px;">
-            
-            <label style="font-size: 12px; color: var(--text-muted);">Display Name</label>
-            <input type="text" id="customNameInput" placeholder="Enter display name...">
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn-main" onclick="saveProfile()">Save Changes</button>
-                <button class="btn-main" style="background: transparent; border: var(--glass-border); color: var(--text-main);" onclick="closeProfileModal()">Cancel</button>
+            <div>
+                <button onclick="document.getElementById('settingsScreen').classList.remove('hidden')" class="btn" style="background: none; font-size: 20px;">⚙️</button>
+                <button id="logoutBtn" class="btn btn-red">Logout</button>
             </div>
-
-            <button class="btn-main" style="margin-top: 10px; background-color: var(--success);" onclick="requestNotificationPermission()">
-                🔔 Enable Notifications
-            </button>
-
-            <button class="btn-main bg-danger" style="margin-top: 10px; background-color: var(--danger);" onclick="logOut()">🚪 Logout</button>
-        </div>
-    </div>
-
-    <div class="center-column" id="mainScrollArea" onclick="closeContextMenu()">
-        
-        <div id="homeView">
-            <div class="feed-area" id="feedArea"></div>
         </div>
 
-        <div id="createPostView" style="display: none; flex-direction: column; width: 100%; max-width: 600px; margin: 0 auto;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                <button onclick="goHome()" class="profile-back-btn" style="position: relative; top: 0; left: 0;">←</button>
-                <h2 style="margin: 0;">New Post</h2>
-            </div>
+        <div style="flex-grow: 1; overflow-y: auto; background-color: #0f172a; position: relative;">
             
-            <div class="create-post-container">
-                <textarea id="postInput" placeholder="What's on your mind?"></textarea>
-                
-                <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="previewMedia(event, 'imagePreview')">
-                <input type="file" id="videoUpload" accept="video/*" style="display: none;" onchange="previewMedia(event, 'videoPreview')">
-                
-                <img id="imagePreview" src="">
-                <video id="videoPreview" controls></video>
-                
-                <div class="media-buttons">
-                    <button class="media-btn" onclick="document.getElementById('imageUpload').click()">📷 Add Photo</button>
-                    <button class="media-btn" onclick="document.getElementById('videoUpload').click()">🎥 Add Video</button>
-                    <select id="postPrivacy" class="privacy-select" style="margin-left: auto;">
-                        <option value="public">🌍 Public</option>
-                        <option value="friends">👥 Friends Only</option>
-                    </select>
-                    <button id="postBtn" class="btn-main" style="margin-top: 0; width: auto; padding: 8px 25px;" onclick="createPost()">Share</button>
+            <div id="viewChats" style="padding: 15px;">
+                <h3 style="color: #94a3b8; font-size: 14px; text-transform: uppercase; margin-bottom: 15px;">Your Messages</h3>
+                <div id="friendsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+
+            <div id="viewFeed" class="hidden" style="padding: 15px;">
+                <div style="background-color: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                    <textarea id="postInput" placeholder="What's on your mind?" style="width: 100%; background: none; border: none; color: white; outline: none; resize: none; font-family: inherit; font-size: 16px; margin-bottom: 10px;"></textarea>
+                    
+                    <img id="postImagePreview" class="hidden media-preview" style="max-width: 100%; margin-bottom: 10px;">
+                    <p id="postUploadStatus" style="color: #38bdf8; font-size: 12px; margin: 0;"></p>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <input type="file" id="postImageUpload" accept="image/*, video/*" class="hidden" onchange="previewPostMedia(event)">
+                        <button onclick="document.getElementById('postImageUpload').click()" class="btn" style="background: none; font-size: 20px; padding: 0;">📷 Attach</button>
+                        <button onclick="createPost()" class="btn btn-blue">Post to Feed</button>
+                    </div>
                 </div>
-                <span id="uploadStatus" style="color: var(--accent); font-size: 14px; margin-top: 10px; display: block;"></span>
-            </div>
-        </div>
-
-        <div id="notificationsView">
-            <h2 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">🔔 Activity Hub</h2>
-            <div id="notificationsList" class="feed-area">
-                <div style="text-align:center; color:var(--text-muted);">No recent activity.</div>
-            </div>
-        </div>
-
-        <div id="userProfileView">
-            <div class="profile-banner">
-                <button class="profile-back-btn" onclick="goHome()">←</button>
-                <img id="targetProfileAvatar" class="profile-banner-avatar" src="">
-                <h2 id="targetProfileName" style="margin: 0; font-size: 24px;">User Name</h2>
-                <div id="targetProfileActions" style="display: flex; gap: 10px; margin-top: 10px;"></div>
-            </div>
-            <h3 style="margin-top: 0; color: var(--text-muted);">Recent Posts</h3>
-            <div class="feed-area" id="profileFeedArea"></div>
-        </div>
-
-        <div id="chatView">
-            <div class="chat-header">
-                <button onclick="goHome()" style="background: none; color: var(--text-main); font-size: 24px; margin-right: 10px; padding: 0;">←</button>
-                <img id="chatHeaderAvatar" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: none;">
-                <span id="chatFriendName">Chat</span>
-            </div>
-            
-            <div class="chat-messages" id="chatMessages" onscroll="closeContextMenu()"></div>
-            
-            <img id="chatImagePreview" src="" style="display: none; height: 80px; object-fit: contain; margin: 0 15px; border-radius: 10px;">
-            <video id="chatVideoPreview" src="" style="display: none; height: 80px; margin: 0 15px; border-radius: 10px;" controls></video>
-            <span id="chatUploadStatus" style="color: var(--accent); font-size: 12px; margin-left: 15px; display: block;"></span>
-
-            <div class="chat-input-area">
-                <input type="file" id="chatImageUpload" accept="image/*" style="display: none;" onchange="previewMedia(event, 'chatImagePreview')">
-                <input type="file" id="chatVideoUpload" accept="video/*" style="display: none;" onchange="previewMedia(event, 'chatVideoPreview')">
                 
-                <button class="action-icon" onclick="document.getElementById('chatImageUpload').click()" title="Send Photo">📷</button>
-                <button class="action-icon" onclick="document.getElementById('chatVideoUpload').click()" title="Send Video">🎥</button>
-                <button class="action-icon" id="micBtn" onclick="toggleAudioRecord()" title="Hold to Record Audio">🎙️</button>
-                
-                <input type="text" id="chatInput" placeholder="Message..." onkeypress="handleChatEnter(event)">
-                <button onclick="sendMessage()" style="background: var(--accent); color: white; border-radius: 50%; width: 45px; height: 45px; font-size: 18px; flex-shrink: 0;">➤</button>
+                <div id="feedTimeline"></div>
             </div>
+        </div>
+
+        <div class="nav-bar">
+            <button id="tabChats" onclick="switchTab('chats')" class="nav-btn active">💬 Chats</button>
+            <button id="tabFeed" onclick="switchTab('feed')" class="nav-btn">🌍 Feed</button>
         </div>
     </div>
 
-    <div class="sidebar-left">
-        <div class="brand-header">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="url(#logo-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <defs><linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366f1" /><stop offset="100%" stop-color="#a855f7" /></linearGradient></defs>
-                <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-            </svg>
-            <h1 class="logo">DigNex</h1>
+    <div id="chatScreen" class="hidden" style="height: 100vh; display: flex; flex-direction: column; background-color: #0b1120; position: absolute; top: 0; left: 0; right: 0; z-index: 50;">
+        
+        <div style="padding: 15px; background-color: #1e293b; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155;">
+            <div style="display: flex; align-items: center;">
+                <button onclick="closeChat()" style="background: none; border: none; color: #38bdf8; font-size: 20px; margin-right: 15px; cursor: pointer;">⬅</button>
+                <img id="chatHeaderAvatar" src="" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover; border: 2px solid #38bdf8;">
+                <h3 id="chatHeaderName" style="margin: 0; font-size: 18px;"></h3>
+            </div>
+            <button onclick="clearCurrentChat()" class="btn btn-red" style="padding: 6px 12px; font-size: 14px;">🗑️ Clear</button>
         </div>
 
-        <div class="nav-item" onclick="goHome()">🏠 <span>Feed</span></div>
-        <div class="nav-item" onclick="openCreatePost()">➕ <span>Create</span></div>
-        <div class="nav-item" onclick="toggleFriendsMenu()">
-            👥 <span>Friends</span>
-            <div id="navBadge" class="badge">0</div>
-        </div>
-        <div class="nav-item" onclick="openNotifications()">
-            🔔 <span>Activity</span>
-            <div id="activityBadge" class="badge">0</div>
-        </div>
-        <div class="nav-item" onclick="openProfileModal()">⚙️ <span>Settings</span></div>
+        <div id="chatMessages" style="flex-grow: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column;"></div>
         
-        <button id="loginBtn" class="btn-main" onclick="signIn()">Google Login</button>
-        <div id="userInfo" style="display: none; margin-top: auto; flex-direction: column; align-items: center; gap: 10px;">
-            <img id="myAvatarDisplay" src="" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; display: none; cursor:pointer; border: 2px solid var(--accent);" onclick="if(currentUser) openUserProfile(currentUser.uid)">
+        <div id="typingIndicator" class="hidden" style="color: #94a3b8; font-size: 12px; font-style: italic; padding: 0 15px 5px 15px;">
+            Friend is typing...
+        </div>
+
+        <div style="padding: 0 15px;">
+            <img id="chatImagePreview" class="hidden media-preview">
+            <video id="chatVideoPreview" class="hidden media-preview" controls></video>
+            <p id="chatUploadStatus" style="color: #38bdf8; font-size: 12px; margin: 5px 0 0 0;"></p>
+        </div>
+
+        <div style="padding: 15px; background-color: #1e293b; border-top: 1px solid #334155; display: flex; gap: 10px; align-items: center;">
+            <input type="file" id="chatImageUpload" accept="image/*" class="hidden" onchange="previewChatMedia(event, 'image')">
+            <input type="file" id="chatVideoUpload" accept="video/*" class="hidden" onchange="previewChatMedia(event, 'video')">
+            
+            <button onclick="document.getElementById('chatImageUpload').click()" class="btn" style="background: none; font-size: 20px; padding: 0;">📷</button>
+            <button onclick="document.getElementById('chatVideoUpload').click()" class="btn" style="background: none; font-size: 20px; padding: 0;">🎥</button>
+            
+            <input type="text" id="chatInput" placeholder="Message..." oninput="handleTyping()" onkeypress="if(event.key === 'Enter') sendMessage()">
+            <button onclick="sendMessage()" class="btn btn-blue" style="border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;">➤</button>
         </div>
     </div>
 
-    <div class="sidebar-right" id="rightSidebar">
-        <button onclick="toggleFriendsMenu()" style="display: block; background: rgba(128,128,128,0.2); border:none; color:var(--text-main); padding:10px; border-radius:10px; width:100%; margin-bottom:15px; font-weight:bold;" class="mobile-close-btn">Close Menu ✖</button>
-        
-        <div>
-            <input type="text" class="search-box" id="userSearch" placeholder="🔍 Search users..." onkeyup="searchUsers()">
-            <div id="searchResults" style="margin-top: 10px;"></div>
+    <div id="settingsScreen" class="hidden" style="height: 100vh; background-color: #0f172a; position: absolute; top: 0; left: 0; right: 0; z-index: 100; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 style="margin: 0;">Settings</h2>
+            <button onclick="document.getElementById('settingsScreen').classList.add('hidden')" class="btn btn-red">Close</button>
         </div>
-        <div id="requestsSection" style="display: none;">
-            <h4 style="color: var(--text-muted); font-size: 12px; margin-top: 20px;">FRIEND REQUESTS</h4>
-            <div id="requestsList"></div>
-        </div>
-        <div>
-            <h4 style="color: var(--text-muted); font-size: 12px; margin-top: 20px;">MY FRIENDS</h4>
-            <div id="friendsList"></div>
+        <div style="background-color: #1e293b; padding: 20px; border-radius: 12px;">
+            <h3 style="margin-top: 0;">Push Notifications</h3>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Receive alerts when your friends message you.</p>
+            <button onclick="requestNotificationPermission()" class="btn btn-blue" style="width: 100%;">🔔 Enable Notifications</button>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, orderBy, query, onSnapshot, doc, setDoc, getDoc, deleteDoc, updateDoc, arrayUnion, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        
-        // --- ADDED MESSAGING IMPORTS FOR NATIVE PUSH ---
-        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, updateDoc, deleteDoc, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js";
 
-        // ==========================================
-        // ⚠️ PASTE YOUR CONFIGS HERE ⚠️
-        // ==========================================
+        // ⚠️ PASTE YOUR EXACT FIREBASE CONFIG HERE ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCiF_rlhJO8TO3RJ2G4OaG9SOZoGgPpvhk",
             authDomain: "dignex-88f5b.firebaseapp.com",
@@ -372,501 +146,342 @@
             appId: "1:1039498013474:web:2299eefcfc750de54f537b"
 };
 
-        const CLOUDINARY_CLOUD_NAME = "dcyl66lfc"; 
-        const CLOUDINARY_UPLOAD_PRESET = "lzxuzi3d"; 
-        // ==========================================
-
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
         const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-        
-        // Initialize Messaging for Push Notifications
+        const db = getFirestore(app);
         const messaging = getMessaging(app);
-        
+
+        // Global Variables
         let currentUser = null;
-        let selectedFile = null; let selectedFileType = null;
-        let chatSelectedFile = null; let chatSelectedFileType = null;
-        let digNexProfile = { customName: "", avatarBase64: "" };
-        let allUsersCache = []; let myFriendsCache = []; let myRequestsCache = [];
-        let allPostsCache = []; 
-        let currentChatFriendId = null; let chatUnsubscribe = null;
-        let currentProfileViewId = null; 
-        let mediaRecorder; let audioChunks = []; let isRecording = false;
-        let longPressTimer; 
+        let digNexProfile = null;
+        let currentChatFriendId = null;
+        let chatUnsubscribe = null;
+        let typingUnsubscribe = null;
+        let chatSelectedFile = null;
+        let chatSelectedFileType = null;
+        let typingTimeout = null;
 
-        // --- PUSH NOTIFICATION PERMISSION LOGIC ---
-       window.requestNotificationPermission = async () => {
-            try {
-                alert("1. Asking browser for permission...");
-                const permission = await Notification.requestPermission();
-                alert("2. Browser said: " + permission);
-                
-                if (permission === 'granted') {
-                    alert("3. Permission granted! Waiting for Service Worker to be fully active...");
-                    
-                    // 1. Register the worker
-                    await navigator.serviceWorker.register('./firebase-messaging-sw.js');
-                    
-                    // 2. FORCE the browser to wait until it is 100% active and ready
-                    const registration = await navigator.serviceWorker.ready;
-                    
-                    alert("4. Worker is ACTIVE! Fetching token...");
-                    
-                    // 3. Pass the fully ready registration to Firebase
-                    const currentToken = await getToken(messaging, { 
-                        vapidKey: "BOEJshwyI0lNpsEspDyuVG7M95DmColVvtcZWCWX85wCfbUd6F30L7N39oyBXP0o_gq55R1Qen1JPcglhznq2lU",
-                        serviceWorkerRegistration: registration
-                    });
-                    
-                    if (currentToken && currentUser) {
-                        alert("5. SUCCESS! Token saved to database! 🎉");
-                        await updateDoc(doc(db, "users", currentUser.uid), {
-                            fcmToken: currentToken
-                        });
-                    } else {
-                        alert("ERROR: Failed to generate token from Google.");
-                    }
-                } else {
-                    alert("Permission denied. You won't receive notifications.");
-                }
-            } catch (error) {
-                // THIS IS THE MOST IMPORTANT ALERT
-                alert("CRITICAL ERROR: " + error.message);
-            }
-        };
+        // --- Cloudinary Upload Function ---
+        const CLOUDINARY_UPLOAD_PRESET = "dcyl66lfc"; // ⚠️ PASTE HERE
+        const CLOUDINARY_CLOUD_NAME = "lzxuzi3d";       // ⚠️ PASTE HERE
 
-        // --- THEME SYSTEM ---
-        const themeBtn = document.getElementById('themeToggleBtn');
-        let isLightMode = localStorage.getItem('dignexTheme') === 'light';
-        function applyTheme() {
-            if (isLightMode) { document.body.classList.add('light-mode'); themeBtn.innerText = '🌙 Dark Mode'; } 
-            else { document.body.classList.remove('light-mode'); themeBtn.innerText = '☀️ Light Mode'; }
-        }
-        applyTheme(); 
-        window.toggleTheme = () => { isLightMode = !isLightMode; localStorage.setItem('dignexTheme', isLightMode ? 'light' : 'dark'); applyTheme(); };
-
-        if(window.innerWidth > 768) { document.querySelector('.mobile-close-btn').style.display = 'none'; }
-
-        async function uploadToCloudinary(file, resourceType = 'auto') {
+        async function uploadToCloudinary(file, resourceType) {
             const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
-            const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            const fd = new FormData();
+            fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            fd.append('file', file);
             try {
-                const response = await fetch(url, { method: 'POST', body: formData });
+                const response = await fetch(url, { method: 'POST', body: fd });
                 const data = await response.json();
-                if(data.error) throw new Error(data.error.message);
                 return data.secure_url;
-            } catch (error) { console.error("Cloudinary Error:", error); alert("Upload Failed. Check Cloudinary keys."); return null; }
+            } catch (error) { console.error("Cloudinary failed:", error); return null; }
         }
 
-        const compressAvatar = async (file) => {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas'); canvas.width = 150; canvas.height = 150;
-                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 150, 150); resolve(canvas.toDataURL('image/jpeg', 0.8)); 
-                    }; img.src = e.target.result;
-                }; reader.readAsDataURL(file);
-            });
-        };
+        // --- Authentication ---
+        document.getElementById('googleLoginBtn').addEventListener('click', () => {
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => alert("Login failed: " + err.message));
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                currentUser = user; document.getElementById('loginBtn').style.display = 'none'; document.getElementById('userInfo').style.display = 'flex';
-                const userRef = doc(db, "users", user.uid); const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) { digNexProfile = userSnap.data(); } else { digNexProfile = { customName: user.displayName, avatarBase64: "", uid: user.uid }; await setDoc(userRef, digNexProfile); }
-                updateProfileUI(); loadAllUsers(); listenToRequests(); listenToFriends(); listenToActivity();
+                currentUser = user;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainAppScreen').classList.remove('hidden');
+
+                const userDocRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userDocRef);
+
+                if (!userSnap.exists()) {
+                    digNexProfile = { customName: user.displayName, avatarBase64: user.photoURL, uid: user.uid };
+                    await setDoc(userDocRef, digNexProfile);
+                } else {
+                    digNexProfile = userSnap.data();
+                }
+
+                document.getElementById('myName').innerText = digNexProfile.customName;
+                document.getElementById('myAvatar').src = digNexProfile.avatarBase64;
+                
+                loadFriendsList();
+                loadGlobalFeed(); // Start listening to posts!
             } else {
-                currentUser = null; document.getElementById('loginBtn').style.display = 'block'; document.getElementById('userInfo').style.display = 'none'; goHome();
+                currentUser = null;
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('mainAppScreen').classList.add('hidden');
+                document.getElementById('chatScreen').classList.add('hidden');
             }
         });
 
-        function updateProfileUI() { const avatarDisplay = document.getElementById('myAvatarDisplay'); if (digNexProfile.avatarBase64) { avatarDisplay.src = digNexProfile.avatarBase64; avatarDisplay.style.display = 'block'; } }
-        window.signIn = async () => { try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); } };
-        window.logOut = async () => { await signOut(auth); closeProfileModal(); };
-
-        // --- NAVIGATION ---
-        function hideAllViews() {
-            document.getElementById('homeView').style.display = 'none';
-            document.getElementById('createPostView').style.display = 'none';
-            document.getElementById('userProfileView').style.display = 'none';
-            document.getElementById('chatView').style.display = 'none';
-            document.getElementById('notificationsView').style.display = 'none';
-            document.getElementById('rightSidebar').classList.remove('active');
-        }
-
-        window.goHome = () => { hideAllViews(); document.getElementById('homeView').style.display = 'block'; currentChatFriendId = null; currentProfileViewId = null; if(chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; } renderFeeds(); };
-        window.openCreatePost = () => { hideAllViews(); document.getElementById('createPostView').style.display = 'flex'; };
-        window.openNotifications = () => { hideAllViews(); document.getElementById('notificationsView').style.display = 'flex'; currentChatFriendId = null; currentProfileViewId = null; if(chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; } markNotificationsRead(); };
-        window.toggleFriendsMenu = () => { document.getElementById('rightSidebar').classList.toggle('active'); };
-        window.openProfileModal = () => { if (!currentUser) return; document.getElementById('customNameInput').value = digNexProfile.customName; document.getElementById('profileModal').style.display = 'flex'; document.getElementById('rightSidebar').classList.remove('active'); };
-        window.closeProfileModal = () => { document.getElementById('profileModal').style.display = 'none'; };
-
-        window.saveProfile = async () => {
-            const newName = document.getElementById('customNameInput').value.trim(); const avatarFile = document.getElementById('avatarUploadInput').files[0];
-            if (newName) digNexProfile.customName = newName; if (avatarFile) digNexProfile.avatarBase64 = await compressAvatar(avatarFile);
-            await setDoc(doc(db, "users", currentUser.uid), digNexProfile, { merge: true }); updateProfileUI(); closeProfileModal(); loadAllUsers();
-        };
-
-        window.previewMedia = (event, targetId) => {
-            const file = event.target.files[0]; if (!file) return;
-            if(targetId.includes('chat')) {
-                document.getElementById('chatImagePreview').style.display = 'none'; document.getElementById('chatVideoPreview').style.display = 'none';
-                chatSelectedFile = file; chatSelectedFileType = file.type.includes('video') ? 'video' : 'image';
+        // --- Navigation Tabs ---
+        window.switchTab = (tab) => {
+            if (tab === 'chats') {
+                document.getElementById('viewChats').classList.remove('hidden');
+                document.getElementById('viewFeed').classList.add('hidden');
+                document.getElementById('tabChats').classList.add('active');
+                document.getElementById('tabFeed').classList.remove('active');
             } else {
-                document.getElementById('imagePreview').style.display = 'none'; document.getElementById('videoPreview').style.display = 'none';
-                selectedFile = file; selectedFileType = file.type.includes('video') ? 'video' : 'image';
+                document.getElementById('viewFeed').classList.remove('hidden');
+                document.getElementById('viewChats').classList.add('hidden');
+                document.getElementById('tabFeed').classList.add('active');
+                document.getElementById('tabChats').classList.remove('active');
             }
-            const preview = document.getElementById(targetId); preview.src = URL.createObjectURL(file); preview.style.display = 'block';
         };
 
-        // --- GLOBAL ACTIONS ---
-        window.deletePost = async (postId) => { if (confirm("Delete this post?")) await deleteDoc(doc(db, "posts", postId)); };
-        window.editPost = async (postId, encodedText) => { const currentText = decodeURIComponent(encodedText); const newText = prompt("Edit your post:", currentText); if (newText !== null && newText.trim() !== "") { await updateDoc(doc(db, "posts", postId), { text: newText.trim(), isEdited: true }); } };
+        // --- The Global Feed (Phase 2A) ---
+        let postSelectedFile = null;
+        let postSelectedFileType = null;
 
-        window.toggleLike = async (postId) => {
-            if (!currentUser) return; const post = allPostsCache.find(p => p.id === postId); if(!post) return;
-            let currentLikes = post.likes || []; let isLiking = false;
-            if(currentLikes.includes(currentUser.uid)) { currentLikes = currentLikes.filter(id => id !== currentUser.uid); } 
-            else { currentLikes.push(currentUser.uid); isLiking = true; }
-            await updateDoc(doc(db, "posts", postId), { likes: currentLikes });
-            if(isLiking && post.authorId !== currentUser.uid) { await addDoc(collection(db, "users", post.authorId, "notifications"), { type: 'like', fromName: digNexProfile.customName, postId: postId, timestamp: serverTimestamp(), read: false }); }
-        };
-
-        window.toggleCommentSection = (postId) => { const sec = document.getElementById(`comments-${postId}`); sec.style.display = sec.style.display === 'none' ? 'block' : 'none'; };
-        
-        window.addComment = async (postId) => {
-            if (!currentUser) return; const input = document.getElementById(`comment-input-${postId}`); const text = input.value.trim();
-            if(!text) return; input.value = "Posting...";
-            const post = allPostsCache.find(p => p.id === postId);
-            await updateDoc(doc(db, "posts", postId), { comments: arrayUnion({ text: text, author: digNexProfile.customName, authorAvatar: digNexProfile.avatarBase64, timestamp: Date.now() }) });
-            if(post && post.authorId !== currentUser.uid) { await addDoc(collection(db, "users", post.authorId, "notifications"), { type: 'comment', text: text, fromName: digNexProfile.customName, postId: postId, timestamp: serverTimestamp(), read: false }); }
-        };
-
-        function listenToActivity() {
-            if(!currentUser) return;
-            onSnapshot(query(collection(db, "users", currentUser.uid, "notifications"), orderBy("timestamp", "desc")), (snapshot) => {
-                const list = document.getElementById('notificationsList'); list.innerHTML = ""; let unreadCount = 0;
-                if(snapshot.empty) { list.innerHTML = "<div style='text-align:center; color:var(--text-muted);'>No recent activity.</div>"; document.getElementById('activityBadge').style.display = 'none'; return; }
-                
-                snapshot.forEach(docSnap => {
-                    const notif = docSnap.data(); if(!notif.read) unreadCount++;
-                    const div = document.createElement('div'); div.className = `notif-card ${!notif.read ? 'notif-unread' : ''}`;
-                    
-                    let icon = '🔔'; let actionText = ''; let clickAction = '';
-                    
-                    if(notif.type === 'like') { icon = '❤️'; actionText = 'liked your post.'; }
-                    else if(notif.type === 'comment') { icon = '📝'; actionText = `commented: "${notif.text}"`; }
-                    else if(notif.type === 'message') { 
-                        icon = '💬'; actionText = 'sent you a new message.'; 
-                        clickAction = `onclick="openChat('${notif.fromId}', '${notif.fromName}', '${notif.fromAvatar}')"`;
-                    }
-
-                    div.innerHTML = `<div style="font-size: 20px;" ${clickAction}>${icon}</div><div style="flex:1;" ${clickAction}><b>${notif.fromName}</b> ${actionText}</div>`; 
-                    list.appendChild(div);
-                });
-                
-                const badge = document.getElementById('activityBadge');
-                if(unreadCount > 0) { badge.style.display = 'block'; badge.innerText = unreadCount; } else { badge.style.display = 'none'; }
-            });
-        }
-
-        async function markNotificationsRead() {
-            if(!currentUser) return;
-            const q = query(collection(db, "users", currentUser.uid, "notifications"));
-            const snap = await getDocs(q);
-            snap.forEach(async (docSnap) => { if(!docSnap.data().read) { await updateDoc(doc(db, "users", currentUser.uid, "notifications", docSnap.id), { read: true }); } });
-            document.getElementById('activityBadge').style.display = 'none';
-        }
-
-        window.openUserProfile = (userId) => {
-            if(!userId) return; hideAllViews(); currentProfileViewId = userId; document.getElementById('userProfileView').style.display = 'flex';
-            let userData = (currentUser && userId === currentUser.uid) ? digNexProfile : allUsersCache.find(u => u.id === userId);
-            if(userData) {
-                document.getElementById('targetProfileName').innerText = userData.customName || "User";
-                const avatarImg = document.getElementById('targetProfileAvatar');
-                if(userData.avatarBase64) { avatarImg.src = userData.avatarBase64; avatarImg.style.display = 'block'; } else { avatarImg.style.display = 'none'; }
-                const actionsDiv = document.getElementById('targetProfileActions'); actionsDiv.innerHTML = ""; 
-                if (currentUser && userId !== currentUser.uid) {
-                    const isFriend = myFriendsCache.includes(userId); const isRequested = myRequestsCache.includes(userId);
-                    if (isFriend) { actionsDiv.innerHTML = `<button class="btn-main" onclick="openChat('${userId}', '${userData.customName}', '${userData.avatarBase64}')">Message</button>`; } 
-                    else if (isRequested) { actionsDiv.innerHTML = `<span style="color:var(--text-muted); font-size: 14px;">Request Pending</span>`; } 
-                    else { actionsDiv.innerHTML = `<button class="btn-main" onclick="sendRequest('${userId}')">Add Friend</button>`; }
-                }
-            } renderFeeds();
+        window.previewPostMedia = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            postSelectedFile = file;
+            postSelectedFileType = file.type.startsWith('video/') ? 'video' : 'image';
+            document.getElementById('postImagePreview').src = URL.createObjectURL(file);
+            document.getElementById('postImagePreview').classList.remove('hidden');
         };
 
         window.createPost = async () => {
-            if (!currentUser) { alert("Login first!"); return; }
-            const input = document.getElementById('postInput'); const postText = input.value.trim();
-            const privacySetting = document.getElementById('postPrivacy').value; 
-            if (postText === "" && !selectedFile) return; 
-            
-            const statusLabel = document.getElementById('uploadStatus'); statusLabel.innerText = selectedFileType === 'video' ? "Uploading Video..." : "Posting...";
+            const text = document.getElementById('postInput').value.trim();
+            if (text === "" && !postSelectedFile) return;
+
+            const statusLabel = document.getElementById('postUploadStatus');
+            document.getElementById('postInput').value = "";
             let mediaUrl = null;
-            if (selectedFile) { const resType = selectedFileType === 'video' ? 'video' : 'image'; mediaUrl = await uploadToCloudinary(selectedFile, resType); }
 
-            if(mediaUrl || postText !== "") {
-                await addDoc(collection(db, "posts"), {
-                    authorId: currentUser.uid, text: postText, author: digNexProfile.customName, authorAvatar: digNexProfile.avatarBase64, 
-                    mediaUrl: mediaUrl, mediaType: selectedFileType, visibility: privacySetting, timestamp: serverTimestamp(), likes: [], comments: [] 
-                });
+            if (postSelectedFile) {
+                statusLabel.innerText = "Uploading to Feed...";
+                mediaUrl = await uploadToCloudinary(postSelectedFile, postSelectedFileType);
+                postSelectedFile = null;
+                document.getElementById('postImagePreview').classList.add('hidden');
             }
-            input.value = ""; selectedFile = null; selectedFileType = null;
-            document.getElementById('imagePreview').style.display = 'none'; document.getElementById('videoPreview').style.display = 'none';
-            document.getElementById('imageUpload').value = ''; document.getElementById('videoUpload').value = ''; statusLabel.innerText = "";
-            goHome(); 
+
+            statusLabel.innerText = "Posting...";
+            await addDoc(collection(db, "posts"), {
+                authorId: currentUser.uid,
+                authorName: digNexProfile.customName,
+                authorAvatar: digNexProfile.avatarBase64,
+                text: text,
+                mediaUrl: mediaUrl,
+                mediaType: postSelectedFileType,
+                timestamp: serverTimestamp(),
+            });
+            statusLabel.innerText = "";
         };
 
-        onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snapshot) => { allPostsCache = []; snapshot.forEach(doc => allPostsCache.push({ id: doc.id, ...doc.data() })); renderFeeds(); });
+        function loadGlobalFeed() {
+            const q = query(collection(db, "posts"), orderBy("timestamp", "desc"), limit(50));
+            onSnapshot(q, (snapshot) => {
+                const timeline = document.getElementById('feedTimeline');
+                timeline.innerHTML = "";
+                snapshot.forEach((docSnap) => {
+                    const post = docSnap.data();
+                    const div = document.createElement('div');
+                    div.className = "post-card";
+                    
+                    let mediaHtml = "";
+                    if (post.mediaUrl) {
+                        if (post.mediaType === 'image') mediaHtml = `<img src="${post.mediaUrl}" style="width:100%; border-radius:8px; margin-top:10px;">`;
+                        if (post.mediaType === 'video') mediaHtml = `<video src="${post.mediaUrl}" controls style="width:100%; border-radius:8px; margin-top:10px;"></video>`;
+                    }
 
-        function renderFeeds() {
-            const targetContainerId = currentProfileViewId ? 'profileFeedArea' : 'feedArea';
-            const feedContainer = document.getElementById(targetContainerId); if(!feedContainer) return; feedContainer.innerHTML = '';
-            let postsShown = 0;
-            allPostsCache.forEach((post) => {
-                if (currentProfileViewId && post.authorId !== currentProfileViewId) return;
-                const visibility = post.visibility || 'public'; const isOwner = currentUser && post.authorId === currentUser.uid; const isFriend = currentUser && myFriendsCache.includes(post.authorId);
-                if (visibility === 'friends' && !isOwner && !isFriend) return; 
-                postsShown++;
-                const privacyBadge = visibility === 'friends' ? '<span title="Friends Only" style="font-size:12px; margin-left: 5px; opacity:0.8;">👥</span>' : '<span title="Public" style="font-size:12px; margin-left: 5px; opacity:0.8;">🌍</span>';
-                const newPost = document.createElement('div'); newPost.className = 'post-card';
-                let mediaHTML = "";
-                if (post.mediaUrl) {
-                    if (post.mediaType === 'video') mediaHTML = `<video src="${post.mediaUrl}" class="post-media" controls></video>`;
-                    else mediaHTML = `<img src="${post.mediaUrl}" class="post-media">`;
-                }
-                let avtHTML = post.authorAvatar ? `<img src="${post.authorAvatar}" class="post-avatar">` : `<div class="post-avatar"></div>`;
-                let editedTag = post.isEdited ? `<span style="font-size: 11px; color: var(--text-muted); font-weight: normal; margin-left: 5px;">(edited)</span>` : "";
-                let ownerActions = "";
-                if (isOwner) { const safeText = encodeURIComponent(post.text || ""); ownerActions = `<button class="action-link" onclick="editPost('${post.id}', '${safeText}')">✏️</button><button class="action-link danger" onclick="deletePost('${post.id}')">🗑️</button>`; }
-                const likesArray = post.likes || []; const likeCount = likesArray.length; const iLiked = currentUser && likesArray.includes(currentUser.uid);
-                const commentsArray = post.comments || [];
-                let commentsHTML = commentsArray.map(c => `<div style="display:flex; gap: 10px; margin-bottom: 10px;"><img src="${c.authorAvatar || ''}" style="width:24px; height:24px; border-radius:50%; background:var(--accent); object-fit: cover; flex-shrink: 0;"><div><b style="font-size:13px;">${c.author}</b> <span style="font-size:13px;">${c.text}</span></div></div>`).join('');
-                newPost.innerHTML = `
-                    <div class="post-header">
-                        <div onclick="openUserProfile('${post.authorId}')" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                            ${avtHTML} <span style="flex:1; font-size:15px;">${post.author || "User"} ${privacyBadge} ${editedTag}</span>
+                    div.innerHTML = `
+                        <div class="post-header">
+                            <img src="${post.authorAvatar}" class="post-avatar">
+                            <div>
+                                <strong style="display:block;">${post.authorName}</strong>
+                                <span style="font-size:10px; color:#94a3b8;">Just now</span>
+                            </div>
                         </div>
-                    </div>
-                    <div style="line-height: 1.5; font-size: 15px;">${post.text}</div>${mediaHTML}
-                    <div style="border-top: 1px solid rgba(128,128,128,0.1); margin-top: 15px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; gap: 10px;">
-                            <button class="action-link ${iLiked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">${iLiked ? '❤️' : '🤍'} ${likeCount > 0 ? likeCount : ''}</button>
-                            <button class="action-link" onclick="toggleCommentSection('${post.id}')">💬 ${commentsArray.length > 0 ? commentsArray.length : ''}</button>
-                        </div>
-                        <div style="display:flex; gap: 5px;">${ownerActions}</div>
-                    </div>
-                    <div class="comments-section" id="comments-${post.id}">
-                        <div style="max-height: 150px; overflow-y: auto; margin-bottom: 10px;">${commentsHTML}</div>
-                        <div class="comment-input-area">
-                            <input type="text" id="comment-input-${post.id}" placeholder="Write a comment..." onkeypress="if(event.key === 'Enter') addComment('${post.id}')">
-                            <button class="btn-main" style="padding: 8px 15px; width: auto;" onclick="addComment('${post.id}')">Post</button>
-                        </div>
-                    </div>`;
-                feedContainer.appendChild(newPost);
+                        <div style="font-size:15px; word-wrap:break-word;">${post.text || ''}</div>
+                        ${mediaHtml}
+                    `;
+                    timeline.appendChild(div);
+                });
             });
-            if (postsShown === 0) feedContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding: 20px;">No visible posts yet.</div>`;
         }
 
-        // --- FRIENDS SYSTEM ---
-        async function loadAllUsers() { onSnapshot(collection(db, "users"), (snapshot) => { allUsersCache = []; snapshot.forEach(doc => { if(!currentUser || doc.id !== currentUser.uid) allUsersCache.push({...doc.data(), id: doc.id}); }); }); }
-        window.searchUsers = () => {
-            const queryText = document.getElementById('userSearch').value.toLowerCase(); const resultsDiv = document.getElementById('searchResults'); resultsDiv.innerHTML = "";
-            if(queryText.length < 1) return;
-            const matches = allUsersCache.filter(u => (u.customName || "").toLowerCase().includes(queryText));
-            matches.forEach(user => {
-                const isFriend = myFriendsCache.includes(user.id); const isRequested = myRequestsCache.includes(user.id);
-                const div = document.createElement('div'); div.className = 'friend-item';
-                let avt = user.avatarBase64 ? `<img src="${user.avatarBase64}" class="friend-avatar">` : `<div class="friend-avatar"></div>`;
-                let btnHTML = `<button class="btn-small bg-accent" onclick="sendRequest('${user.id}')">Add</button>`;
-                if (isFriend) btnHTML = `<span style="font-size:11px;color:var(--text-muted);">Friends</span>`; if (isRequested) btnHTML = `<span style="font-size:11px;color:var(--text-muted);">Req Sent</span>`;
-                div.innerHTML = `<div class="friend-info" onclick="openUserProfile('${user.id}')">${avt} <span class="friend-name">${user.customName}</span></div><div class="action-btns">${btnHTML}</div>`; resultsDiv.appendChild(div);
-            });
-        };
-
-        window.sendRequest = async (targetId) => { if(!currentUser) return; await setDoc(doc(db, "users", targetId, "requests", currentUser.uid), { timestamp: serverTimestamp() }); document.getElementById('userSearch').value = ""; document.getElementById('searchResults').innerHTML = ""; alert("Friend request sent!"); };
-        function listenToRequests() {
-            if(!currentUser) return;
-            onSnapshot(collection(db, "users", currentUser.uid, "requests"), (snapshot) => {
-                myRequestsCache = []; const reqList = document.getElementById('requestsList'); reqList.innerHTML = "";
-                const navBadge = document.getElementById('navBadge');
-                if(snapshot.empty) { document.getElementById('requestsSection').style.display = 'none'; navBadge.style.display = 'none'; return; }
-                document.getElementById('requestsSection').style.display = 'block'; navBadge.style.display = 'block'; navBadge.innerText = snapshot.size;
-                snapshot.forEach(reqDoc => {
-                    const requesterId = reqDoc.id; myRequestsCache.push(requesterId); const userData = allUsersCache.find(u => u.id === requesterId);
-                    if(userData) {
-                        const div = document.createElement('div'); div.className = 'friend-item'; let avt = userData.avatarBase64 ? `<img src="${userData.avatarBase64}" class="friend-avatar">` : `<div class="friend-avatar"></div>`;
-                        div.innerHTML = `<div class="friend-info" onclick="openUserProfile('${requesterId}')">${avt} <span class="friend-name">${userData.customName}</span></div><div class="action-btns"><button class="btn-small bg-success" onclick="acceptRequest('${requesterId}')">✔</button><button class="btn-small bg-danger" onclick="rejectRequest('${requesterId}')">✖</button></div>`; reqList.appendChild(div);
+        // --- Friends List ---
+        function loadFriendsList() {
+            onSnapshot(collection(db, "users"), (snapshot) => {
+                const list = document.getElementById('friendsList');
+                list.innerHTML = "";
+                snapshot.forEach((docSnap) => {
+                    const friend = docSnap.data();
+                    if (friend.uid !== currentUser.uid) {
+                        const div = document.createElement('div');
+                        div.style.cssText = "display:flex; align-items:center; padding:12px; background-color:#1e293b; border-radius:12px; cursor:pointer;";
+                        div.onclick = () => openChat(friend.uid, friend.customName, friend.avatarBase64);
+                        div.innerHTML = `
+                            <img src="${friend.avatarBase64}" style="width:45px; height:45px; border-radius:50%; object-fit:cover; margin-right:15px;">
+                            <span style="font-weight:bold; font-size:16px;">${friend.customName}</span>
+                        `;
+                        list.appendChild(div);
                     }
                 });
             });
         }
-        window.acceptRequest = async (targetId) => { if(!currentUser) return; await setDoc(doc(db, "users", currentUser.uid, "friends", targetId), { timestamp: serverTimestamp() }); await setDoc(doc(db, "users", targetId, "friends", currentUser.uid), { timestamp: serverTimestamp() }); await deleteDoc(doc(db, "users", currentUser.uid, "requests", targetId)); };
-        window.rejectRequest = async (targetId) => { if(!currentUser) return; await deleteDoc(doc(db, "users", currentUser.uid, "requests", targetId)); };
-        function listenToFriends() {
-            if(!currentUser) return;
-            onSnapshot(collection(db, "users", currentUser.uid, "friends"), (snapshot) => {
-                myFriendsCache = []; const list = document.getElementById('friendsList'); list.innerHTML = "";
-                if(snapshot.empty) { list.innerHTML = `<div style="color:var(--text-muted);font-size:13px;text-align:center;">Search and add friends to chat!</div>`; renderFeeds(); return; }
-                snapshot.forEach(friendDoc => {
-                    myFriendsCache.push(friendDoc.id); const friendData = allUsersCache.find(u => u.id === friendDoc.id);
-                    if(friendData) {
-                        const div = document.createElement('div'); div.className = 'friend-item'; let avt = friendData.avatarBase64 ? `<img src="${friendData.avatarBase64}" class="friend-avatar">` : `<div class="friend-avatar"></div>`;
-                        div.innerHTML = `<div class="friend-info" onclick="openUserProfile('${friendData.id}')">${avt} <span class="friend-name">${friendData.customName}</span></div><button class="btn-small bg-success" onclick="openChat('${friendData.id}', '${friendData.customName}', '${friendData.avatarBase64}')">Chat</button>`; list.appendChild(div);
-                    }
-                });
-                renderFeeds(); 
-            });
-        }
 
-        // --- CHAT SYSTEM ---
-        window.deleteMessage = async (msgId) => { const chatId = currentUser.uid < currentChatFriendId ? `${currentUser.uid}_${currentChatFriendId}` : `${currentChatFriendId}_${currentUser.uid}`; await deleteDoc(doc(db, "chats", chatId, "messages", msgId)); };
-        window.editMessage = async (msgId, encodedText) => { const currentText = decodeURIComponent(encodedText); const newText = prompt("Edit your message:", currentText); if (newText !== null && newText.trim() !== "") { const chatId = currentUser.uid < currentChatFriendId ? `${currentUser.uid}_${currentChatFriendId}` : `${currentChatFriendId}_${currentUser.uid}`; await updateDoc(doc(db, "chats", chatId, "messages", msgId), { text: newText.trim(), isEdited: true }); } };
+        // --- Chat & Real-Time Typing (Phase 2B & 2C) ---
+        window.openChat = (friendId, friendName, friendAvatar) => {
+            currentChatFriendId = friendId;
+            document.getElementById('chatHeaderName').innerText = friendName;
+            document.getElementById('chatHeaderAvatar').src = friendAvatar;
+            document.getElementById('chatScreen').classList.remove('hidden');
 
-        const customMenu = document.getElementById('customContextMenu');
-        window.showContextMenu = (e, msgId, safeText, isMine) => {
-            e.preventDefault(); 
-            let x = e.clientX || (e.touches && e.touches[0].clientX); let y = e.clientY || (e.touches && e.touches[0].clientY);
-            if (x > window.innerWidth - 180) x = window.innerWidth - 180; if (y > window.innerHeight - 150) y = window.innerHeight - 150;
-            if (x < 10) x = 10; if (y < 10) y = 10;
-            customMenu.style.left = `${x}px`; customMenu.style.top = `${y}px`; customMenu.style.display = 'flex';
-            let menuHTML = `<button onclick="navigator.clipboard.writeText(decodeURIComponent('${safeText}')); closeContextMenu();">📄 Copy Text</button>`;
-            if (isMine) { menuHTML += `<button onclick="editMessage('${msgId}', '${safeText}'); closeContextMenu();">✏️ Edit</button><button class="danger" onclick="deleteMessage('${msgId}'); closeContextMenu();">🗑️ Unsend</button>`; }
-            customMenu.innerHTML = menuHTML;
-        };
-        window.closeContextMenu = () => { customMenu.style.display = 'none'; };
-
-        window.openChat = (friendId, friendName, friendAvatarBase64) => {
-            if (!currentUser) return;
-            hideAllViews(); document.getElementById('chatView').style.display = 'flex'; 
-            currentChatFriendId = friendId; document.getElementById('chatFriendName').innerText = friendName || "Chat";
-            const headerAvatar = document.getElementById('chatHeaderAvatar');
-            if(friendAvatarBase64 && friendAvatarBase64 !== "undefined") { headerAvatar.src = friendAvatarBase64; headerAvatar.style.display = 'block'; } else { headerAvatar.style.display = 'none'; }
             const chatId = currentUser.uid < friendId ? `${currentUser.uid}_${friendId}` : `${friendId}_${currentUser.uid}`;
-            if (chatUnsubscribe) chatUnsubscribe();
-            const q = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
-            const chatMessagesDiv = document.getElementById('chatMessages');
+            const messagesQuery = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
 
-            chatUnsubscribe = onSnapshot(q, (snapshot) => {
-                chatMessagesDiv.innerHTML = '';
-                snapshot.forEach((doc) => {
-                    const msg = doc.data(); const isMine = msg.senderId === currentUser.uid;
-                    const wrapperDiv = document.createElement('div'); wrapperDiv.className = `chat-bubble-wrapper ${isMine ? 'sent' : 'received'}`;
-                    const msgDiv = document.createElement('div'); msgDiv.className = `chat-bubble ${isMine ? 'msg-sent' : 'msg-received'}`;
-                    let editedTag = msg.isEdited ? `<span style="font-size: 10px; opacity: 0.7; margin-left: 5px;">(edited)</span>` : "";
-                    let content = (msg.text || "") + editedTag;
-                    if(msg.mediaUrl) {
-                        if(msg.mediaType === 'video') content += `${content ? '<br>' : ''}<video src="${msg.mediaUrl}" class="chat-media" controls></video>`;
-                        else if(msg.mediaType === 'audio') content += `${content ? '<br>' : ''}<audio src="${msg.mediaUrl}" controls style="width: 200px; height: 30px; margin-top: 5px;"></audio>`;
-                        else content += `${content ? '<br>' : ''}<img src="${msg.mediaUrl}" class="chat-media">`;
+            if (chatUnsubscribe) chatUnsubscribe();
+            if (typingUnsubscribe) typingUnsubscribe();
+            
+            // 🚀 Phase 2C: Listen for Typing Status
+            typingUnsubscribe = onSnapshot(doc(db, "chats", chatId), (docSnap) => {
+                const typingUI = document.getElementById('typingIndicator');
+                if (docSnap.exists() && docSnap.data()[`typing_${friendId}`] === true) {
+                    typingUI.innerText = `${friendName} is typing...`;
+                    typingUI.classList.remove('hidden');
+                } else {
+                    typingUI.classList.add('hidden');
+                }
+            });
+
+            // 🚀 Phase 2B: Messages and Read Receipts
+            chatUnsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+                const chatArea = document.getElementById('chatMessages');
+                chatArea.innerHTML = "";
+                
+                snapshot.forEach((docSnap) => {
+                    const msg = docSnap.data();
+                    const msgId = docSnap.id;
+                    const isMe = msg.senderId === currentUser.uid;
+                    
+                    // IF I am reading their message, mark it as READ in the database!
+                    if (!isMe && msg.read === false) {
+                        updateDoc(doc(db, "chats", chatId, "messages", msgId), { read: true });
                     }
-                    msgDiv.innerHTML = content; const safeText = encodeURIComponent(msg.text || "");
-                    wrapperDiv.oncontextmenu = (e) => showContextMenu(e, doc.id, safeText, isMine);
-                    wrapperDiv.addEventListener('touchstart', (e) => { longPressTimer = window.setTimeout(() => showContextMenu(e, doc.id, safeText, isMine), 600); });
-                    wrapperDiv.addEventListener('touchend', () => clearTimeout(longPressTimer));
-                    wrapperDiv.addEventListener('touchmove', () => clearTimeout(longPressTimer));
-                    wrapperDiv.appendChild(msgDiv); chatMessagesDiv.appendChild(wrapperDiv);
+
+                    const div = document.createElement('div');
+                    div.className = `message ${isMe ? 'sent' : 'received'}`;
+                    
+                    let content = "";
+                    if (msg.mediaUrl) {
+                        if (msg.mediaType === 'image') content += `<img src="${msg.mediaUrl}" style="max-width:100%; border-radius:8px; margin-bottom:5px;"><br>`;
+                        if (msg.mediaType === 'video') content += `<video src="${msg.mediaUrl}" controls style="max-width:100%; border-radius:8px; margin-bottom:5px;"></video><br>`;
+                    }
+                    if (msg.text) content += msg.text;
+
+                    // ADD READ RECEIPTS UI (Blue Checkmarks)
+                    let ticksHtml = "";
+                    if (isMe) {
+                        ticksHtml = msg.read ? `<span style="color:#a5f3fc; font-weight:bold;">✓✓</span>` : `<span style="color:#cbd5e1;">✓</span>`;
+                    }
+                    
+                    content += `<div class="msg-time">${ticksHtml}</div>`;
+                    
+                    div.innerHTML = content;
+                    chatArea.appendChild(div);
                 });
-                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+                chatArea.scrollTop = chatArea.scrollHeight;
             });
         };
 
-        window.toggleAudioRecord = async () => {
-            const micBtn = document.getElementById('micBtn'); const statusLabel = document.getElementById('chatUploadStatus');
-            if (!isRecording) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream); mediaRecorder.start(); isRecording = true; micBtn.classList.add('recording'); audioChunks = [];
-                    mediaRecorder.addEventListener("dataavailable", event => { audioChunks.push(event.data); });
-                    mediaRecorder.addEventListener("stop", async () => {
-                        micBtn.classList.remove('recording'); statusLabel.innerText = "Sending audio...";
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); const audioFile = new File([audioBlob], "voice_msg.webm", { type: 'audio/webm' });
-                        const audioUrl = await uploadToCloudinary(audioFile, 'video');
-                        if(audioUrl && currentChatFriendId) {
-                            const chatId = currentUser.uid < currentChatFriendId ? `${currentUser.uid}_${currentChatFriendId}` : `${currentChatFriendId}_${currentUser.uid}`;
-                            await addDoc(collection(db, "chats", chatId, "messages"), { senderId: currentUser.uid, text: "", mediaUrl: audioUrl, mediaType: 'audio', timestamp: serverTimestamp() });
-                            
-                            // Trigger Notification for Audio
-                            await addDoc(collection(db, "users", currentChatFriendId, "notifications"), { 
-                                type: 'message', fromName: digNexProfile.customName, fromId: currentUser.uid, fromAvatar: digNexProfile.avatarBase64, timestamp: serverTimestamp(), read: false 
-                            });
-                        }
-                        statusLabel.innerText = "";
-                    });
-                } catch (err) { alert("Microphone access denied!"); }
-            } else { mediaRecorder.stop(); isRecording = false; }
+        window.closeChat = () => {
+            document.getElementById('chatScreen').classList.add('hidden');
+            currentChatFriendId = null;
+            if (chatUnsubscribe) chatUnsubscribe();
+            if (typingUnsubscribe) typingUnsubscribe();
+        };
+
+        // 🚀 Phase 2C: Trigger Typing Status
+        window.handleTyping = () => {
+            if(!currentChatFriendId) return;
+            const chatId = currentUser.uid < currentChatFriendId ? `${currentUser.uid}_${currentChatFriendId}` : `${currentChatFriendId}_${currentUser.uid}`;
+            
+            // Tell database I am typing
+            setDoc(doc(db, "chats", chatId), { [`typing_${currentUser.uid}`]: true }, { merge: true });
+
+            // Stop typing after 2 seconds
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                setDoc(doc(db, "chats", chatId), { [`typing_${currentUser.uid}`]: false }, { merge: true });
+            }, 2000);
+        };
+
+        window.previewChatMedia = (event, type) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            chatSelectedFile = file;
+            chatSelectedFileType = type;
+            const imgPreview = document.getElementById('chatImagePreview');
+            const vidPreview = document.getElementById('chatVideoPreview');
+            
+            if (type === 'image') { imgPreview.src = URL.createObjectURL(file); imgPreview.classList.remove('hidden'); vidPreview.classList.add('hidden'); }
+            else { vidPreview.src = URL.createObjectURL(file); vidPreview.classList.remove('hidden'); imgPreview.classList.add('hidden'); }
         };
 
         window.sendMessage = async () => {
-            const input = document.getElementById('chatInput'); const text = input.value.trim();
+            const input = document.getElementById('chatInput'); 
+            const text = input.value.trim();
             if ((text === "" && !chatSelectedFile) || !currentChatFriendId || !currentUser) return;
-            const statusLabel = document.getElementById('chatUploadStatus'); input.value = ""; 
+            
+            const statusLabel = document.getElementById('chatUploadStatus'); 
+            input.value = ""; 
             
             let chatMediaUrl = null;
-            if(chatSelectedFile) {
+            if (chatSelectedFile) {
                 statusLabel.innerText = chatSelectedFileType === 'video' ? "Sending Video..." : "Sending Photo...";
-                const resType = chatSelectedFileType === 'video' ? 'video' : 'image';
-                chatMediaUrl = await uploadToCloudinary(chatSelectedFile, resType); 
+                chatMediaUrl = await uploadToCloudinary(chatSelectedFile, chatSelectedFileType); 
                 chatSelectedFile = null; chatSelectedFileType = null;
-                document.getElementById('chatImagePreview').style.display = 'none'; document.getElementById('chatVideoPreview').style.display = 'none';
+                document.getElementById('chatImagePreview').classList.add('hidden'); 
+                document.getElementById('chatVideoPreview').classList.add('hidden');
                 document.getElementById('chatImageUpload').value = ''; document.getElementById('chatVideoUpload').value = '';
             }
             
-            if(chatMediaUrl || text !== "") {
+            if (chatMediaUrl || text !== "") {
                 const chatId = currentUser.uid < currentChatFriendId ? `${currentUser.uid}_${currentChatFriendId}` : `${currentChatFriendId}_${currentUser.uid}`;
                 
-                // 1. Save message to database
-                await addDoc(collection(db, "chats", chatId, "messages"), { senderId: currentUser.uid, text: text, mediaUrl: chatMediaUrl, mediaType: chatSelectedFileType, timestamp: serverTimestamp() });
-                
-                // 2. Trigger In-App Notification
-                await addDoc(collection(db, "users", currentChatFriendId, "notifications"), { 
-                    type: 'message', fromName: digNexProfile.customName, fromId: currentUser.uid, fromAvatar: digNexProfile.avatarBase64, timestamp: serverTimestamp(), read: false 
+                // Add message (Default to unread)
+                await addDoc(collection(db, "chats", chatId, "messages"), { 
+                    senderId: currentUser.uid, text: text, mediaUrl: chatMediaUrl, mediaType: chatSelectedFileType, timestamp: serverTimestamp(), read: false 
                 });
-
-                // ========================================================
-                // 🚀 3. THE MAGIC: FIRE THE NATIVE PUSH NOTIFICATION!
-                // ========================================================
+                
+                // Push Notification
                 try {
-                    // Fetch the friend's device token from the database
                     const friendDoc = await getDoc(doc(db, "users", currentChatFriendId));
-                    const friendData = friendDoc.data();
-
-                    if (friendData && friendData.fcmToken) {
-                        let pushBody = text !== "" ? text : "Sent an attachment 📷";
-                        
-                        // Call our Netlify Backend Server
+                    if (friendDoc.data() && friendDoc.data().fcmToken) {
                         fetch('/.netlify/functions/sendPush', {
                             method: 'POST',
-                            body: JSON.stringify({
-                                token: friendData.fcmToken,
-                                title: `New message from ${digNexProfile.customName}`,
-                                body: pushBody
-                            })
-                        }).then(res => console.log("Netlify Server Pinged!"))
-                          .catch(err => console.error("Netlify Ping Failed:", err));
+                            body: JSON.stringify({ token: friendDoc.data().fcmToken, title: `New message from ${digNexProfile.customName}`, body: text !== "" ? text : "Sent an attachment 📷" })
+                        });
                     }
-                } catch (err) {
-                    console.log("Push error:", err);
-                }
+                } catch (err) {}
             }
             statusLabel.innerText = "";
         };
 
-        window.handleChatEnter = (e) => { if (e.key === 'Enter') sendMessage(); };
+        window.clearCurrentChat = async () => {
+            if (!currentChatFriendId || !currentUser) return;
+            if (!confirm("Are you sure you want to clear this chat?")) return;
+            const chatId = currentUser.uid < currentChatFriendId ? `${currentUser.uid}_${currentChatFriendId}` : `${currentChatFriendId}_${currentUser.uid}`;
+            const messagesRef = collection(db, "chats", chatId, "messages");
+            try {
+                const snapshot = await getDocs(messagesRef);
+                snapshot.forEach((docSnap) => deleteDoc(doc(db, "chats", chatId, "messages", docSnap.id)));
+            } catch (error) { alert("Failed to clear chat."); }
+        };
 
-        // --- PWA SERVICE WORKER REGISTRATION ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('DigNex App installed successfully!', reg.scope))
-                    .catch((err) => console.log('App install failed:', err));
-            });
-        }
-
+        window.requestNotificationPermission = async () => {
+            try {
+                const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+                await navigator.serviceWorker.ready;
+                const currentToken = await getToken(messaging, { vapidKey: "BOEJshwyI0lNpsEspDyuVG7M95DmColVvtcZWCWX85wCfbUd6F30L7N39oyBXP0o_gq55R1Qen1JPcglhznq2lU", serviceWorkerRegistration: registration });
+                if (currentToken && currentUser) {
+                    await updateDoc(doc(db, "users", currentUser.uid), { fcmToken: currentToken });
+                    alert("SUCCESS! Notifications Enabled! 🎉");
+                }
+            } catch (error) { alert("ERROR: " + error.message); }
+        };
     </script>
 </body>
-
 </html>
