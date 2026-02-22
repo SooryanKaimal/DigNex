@@ -1,12 +1,14 @@
 const admin = require('firebase-admin');
 
 exports.handler = async (event) => {
-    // Only allow POST requests
     if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
     try {
         // Parse the secure Firebase Service Account key from Netlify
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+        // 🚀 THE FIX: Repair the broken newline characters caused by Netlify's UI
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
 
         // Initialize Firebase Admin (only once)
         if (!admin.apps.length) {
@@ -21,7 +23,7 @@ exports.handler = async (event) => {
         // Fire the notification to the phone!
         const message = {
             notification: { title: title, body: body },
-            token: token, // This is the specific phone's ID
+            token: token, 
         };
 
         await admin.messaging().send(message);
